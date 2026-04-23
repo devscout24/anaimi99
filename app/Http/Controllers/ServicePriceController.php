@@ -98,6 +98,8 @@ class ServicePriceController extends Controller
         ]);
     }
 
+    // Delete a service price
+
     public function destroy($id)
     {
         ServicePrice::findOrFail($id)->delete();
