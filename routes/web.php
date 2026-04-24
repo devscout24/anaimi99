@@ -19,8 +19,3 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
-
-// custom route file
-require __DIR__ . '/backend_farhad.php';
-
-require __DIR__ . '/abdullah.php';
