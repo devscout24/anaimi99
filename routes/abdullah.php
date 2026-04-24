@@ -1,8 +1,7 @@
 <?php
 
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ServicePriceController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Backend\abdullah\ServiceController;
+use App\Http\Controllers\Backend\abdullah\ServicePriceController;
 use Illuminate\Support\Facades\Route;
 
 
