@@ -19,3 +19,6 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// Backend (admin) web routes
+require __DIR__ . '/backend_farhad.php';
