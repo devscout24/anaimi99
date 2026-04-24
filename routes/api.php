@@ -8,3 +8,5 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 require __DIR__ . '/api_farhad.php';
+
+require __DIR__ . '/api_abdullah.php';

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backend\abdullah;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Service;
 use App\Models\ServicePrice;
@@ -71,7 +73,6 @@ class ServicePriceController extends Controller
     public function edit($id)
     {
         $servicePrice = ServicePrice::findOrFail($id);
-
         return response()->json($servicePrice);
     }
 
@@ -108,4 +109,6 @@ class ServicePriceController extends Controller
             'message' => 'Deleted successfully',
         ]);
     }
+
+
 }
