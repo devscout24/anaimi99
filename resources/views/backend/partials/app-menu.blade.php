@@ -28,32 +28,32 @@
                  @endif
              </span>
          </a>
-         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
+         <button type="button" class="p-0 btn btn-sm fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
              <i class="ri-record-circle-line"></i>
          </button>
      </div>
 
      <!-- sidebar-user -->
-     <div class="dropdown sidebar-user m-1 rounded">
+     <div class="m-1 rounded dropdown sidebar-user">
          <button type="button" class="btn material-shadow-none" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             <span class="d-flex align-items-center gap-2">
+             <span class="gap-2 d-flex align-items-center">
                  <img class="rounded header-profile-user" src="{{ auth()->user()->avatar ? asset(auth()->user()->avatar) : asset('backend/assets/images/users/avatar-1.jpg') }}" alt="Header Avatar">
                  <span class="text-start">
                      <span class="d-block fw-medium sidebar-user-name-text">{{ auth()->user()->name }}</span>
-                     <span class="d-block fs-14 sidebar-user-name-sub-text"><i class="ri ri-circle-fill fs-10 text-success align-baseline"></i> <span class="align-middle">Online</span></span>
+                     <span class="d-block fs-14 sidebar-user-name-sub-text"><i class="align-baseline ri ri-circle-fill fs-10 text-success"></i> <span class="align-middle">Online</span></span>
                  </span>
              </span>
          </button>
          <div class="dropdown-menu dropdown-menu-end">
              <!-- item-->
              <h6 class="dropdown-header">Welcome {{ auth()->user()->name }}!</h6>
-             <a class="dropdown-item" href="{{ route('admin.profile-settings.edit') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span
+             <a class="dropdown-item" href="{{ route('admin.profile-settings.edit') }}"><i class="align-middle mdi mdi-account-circle text-muted fs-16 me-1"></i> <span
                      class="align-middle">Profile</span></a>
              <!-- Logout -->
              <form method="POST" action="{{ route('logout') }}">
                  @csrf
                  <button type="submit" class="dropdown-item">
-                     <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
+                     <i class="align-middle mdi mdi-logout text-muted fs-16 me-1"></i>
                      <span class="align-middle" data-key="t-logout">Logout</span>
                  </button>
              </form>
@@ -125,24 +125,21 @@
 
                  {{-- service --}}
                     <li class="nav-item">
-                        <a class="nav-link menu-link {{ request()->routeIs('admin.services.*') ? '' : 'collapsed' }}" href="#sidebarService" data-bs-toggle="collapse" role="button"
-                            aria-expanded="{{ request()->routeIs('admin.services.*') ? 'true' : 'false' }}" aria-controls="sidebarService">
+                        <a class="nav-link menu-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}" href="{{ route('admin.services.index') }}">
                             <i class="ri-service-line"></i> <span>Service</span>
                         </a>
-                        <div class="collapse menu-dropdown {{ request()->routeIs('admin.services.*') ? 'show' : '' }}" id="sidebarService">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
-                                        All Services
-                                    </a>
-                                </li>
-                                <li>  
-                                    <a href="{{ route('admin.service-prices.index') }}" class="nav-link {{ request()->routeIs('admin.service-prices.index') ? 'active' : '' }}">
-                                            Service Prices
-                                        </a>
-                                </li>
-                            </ul>
-                        </div>
+                        <ul class="mt-2 nav nav-sm flex-column ps-4">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
+                                    All Services
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.service-prices.index') }}" class="nav-link {{ request()->routeIs('admin.service-prices.index') ? 'active' : '' }}">
+                                    Service Prices
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
 
