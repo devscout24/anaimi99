@@ -19,6 +19,7 @@ return new class extends Migration
             // Data
             $table->decimal('price', 10, 2);
             $table->decimal('discount', 10, 2)->nullable();
+            $table->time('time')->nullable();
             $table->enum('created_for_type', ['salon', 'barber']);
             $table->timestamps();
         });

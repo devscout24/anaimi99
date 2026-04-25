@@ -24,6 +24,7 @@
                                         <th>#</th>
                                         <th>Service</th>
                                         <th>Type</th>
+                                        <th>Time</th>
                                         <th>Price</th>
                                         <th>Discount</th>
                                         <th>Created By</th>
@@ -63,9 +64,14 @@
                                 <label for="created_for_type" class="form-label">Created For</label>
                                 <select id="created_for_type" class="form-select">
                                     <option value="" selected disabled>Select type</option>
-                                    {{-- <option value="salon">Salon</option> --}}
+                                    <option value="salon">Salon</option>
                                     <option value="barber">Barber</option>
                                 </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="time" class="form-label">Time</label>
+                                <input type="time" id="time" class="form-control" autocomplete="off">
                             </div>
 
                             <div class="mb-3">
@@ -122,6 +128,9 @@
                         data: 'created_for_type'
                     },
                     {
+                        data: 'time'
+                    },
+                    {
                         data: 'price'
                     },
                     {
@@ -169,6 +178,7 @@
 
                 $('#service_id').val('');
                 $('#created_for_type').val('');
+                $('#time').val('');
             }
 
             resetForm();
@@ -183,7 +193,7 @@
                 $('#error-box').addClass('d-none').html('');
 
                 let id = $('#id').val();
-                let url = id ? '/admin/service-prices/update/' + id : '/admin/service-prices/store';
+                let url = id ? "{{ route('admin.service-prices.update', ':id') }}".replace(':id', id) : "{{ route('admin.service-prices.store') }}";
                 let method = id ? 'PUT' : 'POST';
 
                 $.ajax({
@@ -192,6 +202,7 @@
                     data: {
                         service_id: $('#service_id').val(),
                         created_for_type: $('#created_for_type').val(),
+                        time: $('#time').val(),
                         price: $('#price').val(),
                         discount: $('#discount').val()
                     },
@@ -209,10 +220,11 @@
             $(document).on('click', '.js-edit', function() {
                 let id = $(this).data('id');
 
-                $.get('/admin/service-prices/edit/' + id, function(res) {
+                $.get("{{ route('admin.service-prices.edit', ':id') }}".replace(':id', id), function(res) {
                     $('#id').val(res.id);
                     $('#service_id').val(res.service_id);
                     $('#created_for_type').val(res.created_for_type);
+                    $('#time').val(res.time ? res.time.substring(0, 5) : '');
                     $('#price').val(res.price);
                     $('#discount').val(res.discount);
 
@@ -228,7 +240,7 @@
 
                 if (confirm('Delete this service price?')) {
                     $.ajax({
-                        url: '/admin/service-prices/destroy/' + id,
+                        url: "{{ route('admin.service-prices.destroy', ':id') }}".replace(':id', id),
                         method: 'DELETE',
                         success: function(res) {
                             table.ajax.reload(null, false);
