@@ -86,7 +86,7 @@
                                     autocomplete="off">
                             </div>
 
-                            <div class="d-flex gap-2">
+                            <div class="gap-2 d-flex">
                                 <button class="btn btn-primary" id="submitBtn" type="submit">Save</button>
                                 <button class="btn btn-light d-none" id="cancelBtn" type="button">Cancel</button>
                             </div>
