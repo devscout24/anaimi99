@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('admin/serviceIndex', [ServiceProvideController::class, 'serviceIndex']);
 Route::get('admin/servicePriceIndex', [ServiceProvideController::class, 'servicePriceIndex']);
 
-
 Route::get('admin/availabilityDays', [ServiceProvideController::class, 'availabilityIndex']);
+

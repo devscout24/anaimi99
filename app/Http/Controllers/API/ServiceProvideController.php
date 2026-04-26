@@ -19,7 +19,7 @@ class ServiceProvideController extends Controller
         try {
             $services = Service::all();
 
-            return $this->success($services, 'Service API is working');
+            return $this->success($services, 'Service is working');
         } catch (\Exception $e) {
             return $this->error(
                 null,
