@@ -52,7 +52,7 @@ class ServiceProvideController extends Controller
     {
         try {
             $availabilityDays = AvailablityDay::query()
-                ->select('day_name')
+                ->select('id', 'day_name')
                 ->distinct()
                 ->orderBy('day_name')
                 ->get();
