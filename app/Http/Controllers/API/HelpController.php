@@ -14,7 +14,7 @@ class HelpController extends Controller
     public function index()
     {
         try {
-            $help = Help::all();
+            $help = Help::all()->makeHidden(['created_at', 'updated_at']);
 
             return $this->success($help, 'Helps fetched successfully');
         } catch (\Throwable $e) {
@@ -33,6 +33,9 @@ class HelpController extends Controller
 
         try {
             $help = Help::create($validated);
+
+            // hide timestamps only here
+            $help->makeHidden(['created_at', 'updated_at']);
 
             return $this->created($help, 'Help created successfully', 201);
         } catch (\Throwable $e) {

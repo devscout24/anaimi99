@@ -1,7 +1,6 @@
 <?php
 
-
-
+use App\Http\Controllers\API\HelpController;
 use App\Http\Controllers\API\ServiceProvideController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +15,10 @@ Route::middleware(['auth:api'])->prefix('admin')->name('admin.')->group(function
    Route::get('/serviceIndex', [ServiceProvideController::class, 'serviceIndex']);
    Route::get('/servicePriceIndex', [ServiceProvideController::class, 'servicePriceIndex']);
 
-Route::get('availabilityDays', [ServiceProvideController::class, 'availabilityIndex']);
+  Route::get('availabilityDays', [ServiceProvideController::class, 'availabilityIndex']);
 
 });
+
+
+Route::get('/help/index', [HelpController::class, 'index']);
+Route::post('/help/store', [HelpController::class, 'store']);
