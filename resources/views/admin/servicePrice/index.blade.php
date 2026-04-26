@@ -70,8 +70,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="time" class="form-label">Time</label>
-                                <input type="time" id="time" class="form-control" autocomplete="off">
+                                <label for="time_duration" class="form-label">Time Duration</label>
+                                <input type="text" id="time_duration" class="form-control" autocomplete="off">
                             </div>
 
                             <div class="mb-3">
@@ -90,6 +90,7 @@
                                 <button class="btn btn-primary" id="submitBtn" type="submit">Save</button>
                                 <button class="btn btn-light d-none" id="cancelBtn" type="button">Cancel</button>
                             </div>
+                            
                         </form>
                     </div>
                 </div>
@@ -128,7 +129,7 @@
                         data: 'created_for_type'
                     },
                     {
-                        data: 'time'
+                        data: 'time_duration'
                     },
                     {
                         data: 'price'
@@ -178,7 +179,7 @@
 
                 $('#service_id').val('');
                 $('#created_for_type').val('');
-                $('#time').val('');
+                $('#time_duration').val('');
             }
 
             resetForm();
@@ -202,7 +203,7 @@
                     data: {
                         service_id: $('#service_id').val(),
                         created_for_type: $('#created_for_type').val(),
-                        time: $('#time').val(),
+                        time_duration: $('#time_duration').val(),
                         price: $('#price').val(),
                         discount: $('#discount').val()
                     },
@@ -224,7 +225,7 @@
                     $('#id').val(res.id);
                     $('#service_id').val(res.service_id);
                     $('#created_for_type').val(res.created_for_type);
-                    $('#time').val(res.time ? res.time.substring(0, 5) : '');
+                    $('#time_duration').val(res.time_duration || '');
                     $('#price').val(res.price);
                     $('#discount').val(res.discount);
 

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Service;
 use App\Models\ServicePrice;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
@@ -33,8 +32,8 @@ class ServicePriceController extends Controller
 
                     return $user->username ?: ($user->name ?: $user->email);
                 })
-                ->editColumn('time', function (ServicePrice $servicePrice) {
-                    return $servicePrice->time ? Carbon::parse($servicePrice->time)->format('H:i') : '';
+                ->addColumn('time_duration', function (ServicePrice $servicePrice) {
+                    return $servicePrice->time_duration ?? '';
                 })
                 ->addColumn('action', function (ServicePrice $servicePrice) {
                     return '
@@ -57,7 +56,7 @@ class ServicePriceController extends Controller
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'discount' => ['nullable', 'numeric', 'min:0'],
-            'time' => ['nullable', 'date_format:H:i'],
+            'time_duration' => ['nullable', 'string', 'max:100'],
             'created_for_type' => ['required', Rule::in(['salon', 'barber'])],
         ]);
 
@@ -66,7 +65,7 @@ class ServicePriceController extends Controller
             'created_by' => $request->user()->id,
             'price' => $validated['price'],
             'discount' => $validated['discount'] ?? null,
-            'time' => $validated['time'] ?? null,
+            'time_duration' => $validated['time_duration'] ?? null,
             'created_for_type' => $validated['created_for_type'],
         ]);
 
@@ -88,7 +87,7 @@ class ServicePriceController extends Controller
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'discount' => ['nullable', 'numeric', 'min:0'],
-            'time' => ['nullable', 'date_format:H:i'],
+            'time_duration' => ['nullable', 'string', 'max:100'],
             'created_for_type' => ['required', Rule::in(['salon', 'barber'])],
         ]);
 
@@ -98,7 +97,7 @@ class ServicePriceController extends Controller
             'service_id' => $validated['service_id'],
             'price' => $validated['price'],
             'discount' => $validated['discount'] ?? null,
-            'time' => $validated['time'] ?? null,
+            'time_duration' => $validated['time_duration'] ?? null,
             'created_for_type' => $validated['created_for_type'],
         ]);
 

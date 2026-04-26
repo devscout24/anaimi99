@@ -12,14 +12,14 @@ class ServicePrice extends Model
         'created_by',
         'price',
         'discount',
-        'time',
+        'time_duration',
         'created_for_type',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'discount' => 'decimal:2',
-        'time' => 'string',
+        'time_duration' => 'string',
     ];
 
     public function service(): BelongsTo

@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('service_prices', 'time_duration')) {
+        if (!Schema::hasTable('service_prices') || !Schema::hasColumn('service_prices', 'time')) {
+            return;
+        }
+
+        if (Schema::getColumnType('service_prices', 'time') !== 'time') {
             Schema::table('service_prices', function (Blueprint $table) {
-                $table->string('time_duration')->nullable()->after('discount');
+                $table->time('time')->nullable()->change();
             });
         }
     }
@@ -23,9 +27,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasColumn('service_prices', 'time_duration')) {
+        if (!Schema::hasTable('service_prices') || !Schema::hasColumn('service_prices', 'time')) {
+            return;
+        }
+
+        if (Schema::getColumnType('service_prices', 'time') === 'time') {
             Schema::table('service_prices', function (Blueprint $table) {
-                $table->dropColumn('time_duration');
+                $table->integer('time')->nullable()->change();
             });
         }
     }
