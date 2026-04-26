@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\API\ServiceController;
-use App\Http\Controllers\API\ServiceProviderController;
-use App\Http\Controllers\ServiceController as ControllersServiceController;
-use App\Http\Controllers\ServicePriceController;
+
+
+use App\Http\Controllers\API\ServiceProvideController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 // Route::get('/serviceIndex', [ServiceController::class, 'serviceIndex']);
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api'])->prefix('admin')->name('admin.')->group(function () {
 
-   Route::get('/serviceIndex', [ServiceProviderController::class, 'serviceIndex']);
-   Route::get('/servicePriceIndex', [ServiceProviderController::class, 'servicePriceIndex']);
+   Route::get('/serviceIndex', [ServiceProvideController::class, 'serviceIndex']);
+   Route::get('/servicePriceIndex', [ServiceProvideController::class, 'servicePriceIndex']);
 
 });

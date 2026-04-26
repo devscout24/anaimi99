@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backend\abdullah\ServiceController;
 use App\Http\Controllers\Backend\abdullah\ServicePriceController;
+use App\Http\Controllers\Backend\abdullah\AvaiabilityDayController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -22,3 +23,16 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
     Route::delete('service-prices/destroy/{id}', [ServicePriceController::class, 'destroy'])->name('service-prices.destroy');
 
 });
+<<<<<<< HEAD
+=======
+
+
+
+Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
+    // availability days routes
+    Route::get('availability-days', [AvaiabilityDayController::class, 'index'])->name('availability-days.index');
+    Route::post('availability-days', [AvaiabilityDayController::class, 'store'])->name('availability-days.store');
+    Route::patch('availability-days/status/{id}', [AvaiabilityDayController::class, 'toggleStatus'])->name('availability-days.status');
+    Route::delete('availability-days/{id}', [AvaiabilityDayController::class, 'destroy'])->name('availability-days.destroy');
+});
+>>>>>>> d96f7d76e793b7939265357e5d42f09d4d284451

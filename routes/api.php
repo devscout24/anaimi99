@@ -23,7 +23,12 @@ Route::controller(AuthController::class)->group(function () {
 
 
 
+<<<<<<< HEAD
 Route::middleware('auth:api')->group(function () {
+=======
+
+require __DIR__ . '/Shahin.php';
+>>>>>>> d96f7d76e793b7939265357e5d42f09d4d284451
 
 
 Route::controller(AuthController::class)->group(function () {

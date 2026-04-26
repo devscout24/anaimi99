@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
          $this->call([
             AdminUserSeeder::class,
             SystemSettingSeeder::class,
-            SocialSettingSeeder::class
+            SocialSettingSeeder::class,
+            AvailablityDaySeeder::class,
         ]);
     }
 }

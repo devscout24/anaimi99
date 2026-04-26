@@ -32,6 +32,9 @@ class ServicePriceController extends Controller
 
                     return $user->username ?: ($user->name ?: $user->email);
                 })
+                ->addColumn('time_duration', function (ServicePrice $servicePrice) {
+                    return $servicePrice->time_duration ?? '';
+                })
                 ->addColumn('action', function (ServicePrice $servicePrice) {
                     return '
                         <button class="btn btn-sm btn-primary js-edit" data-id="' . $servicePrice->id . '">Edit</button>
@@ -53,6 +56,7 @@ class ServicePriceController extends Controller
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'time_duration' => ['nullable', 'string', 'max:100'],
             'created_for_type' => ['required', Rule::in(['salon', 'barber'])],
         ]);
 
@@ -61,6 +65,7 @@ class ServicePriceController extends Controller
             'created_by' => $request->user()->id,
             'price' => $validated['price'],
             'discount' => $validated['discount'] ?? null,
+            'time_duration' => $validated['time_duration'] ?? null,
             'created_for_type' => $validated['created_for_type'],
         ]);
 
@@ -82,6 +87,7 @@ class ServicePriceController extends Controller
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'time_duration' => ['nullable', 'string', 'max:100'],
             'created_for_type' => ['required', Rule::in(['salon', 'barber'])],
         ]);
 
@@ -91,6 +97,7 @@ class ServicePriceController extends Controller
             'service_id' => $validated['service_id'],
             'price' => $validated['price'],
             'discount' => $validated['discount'] ?? null,
+            'time_duration' => $validated['time_duration'] ?? null,
             'created_for_type' => $validated['created_for_type'],
         ]);
 
