@@ -12,23 +12,77 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
+
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('username')->unique()->nullable();
-            $table->string('email')->unique();
-            $table->string('phone')->unique()->nullable();
+
+            $table->string('name', 100);
+            $table->string('email', 255)->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('username', 255)->nullable()->unique();
+            $table->string('phone', 20)->nullable()->unique();
+            // AUTH
             $table->string('password');
-            $table->string('avatar')->nullable();
-            // optional fields start ---
-            // $table->string('otp', 10)->nullable();
-            // $table->timestamp('otp_expired_at')->nullable();
-            // $table->timestamp('otp_verified_at')->nullable();
-            // $table->string('password_reset_token')->nullable();
-            // $table->timestamp('password_reset_token_expires_at')->nullable();
-            // optional fields end ---
-            $table->tinyInteger('role')->default(0)->comment('1 = Admin, 0 = User');
-            $table->tinyInteger('status')->default(1)->comment('1 = Active, 0 = Inactive');
+
+            // PROFILE
+            $table->string('phone_number', 20)->nullable();
+            $table->string('profile_image', 255)->nullable();
+            $table->string('cover_image', 255)->nullable();
+
+            // LOCATION
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+
+            // SOCIAL LOGIN
+            $table->string('google_id')->nullable();
+            $table->string('facebook_id')->nullable();
+            $table->string('apple_id')->nullable();
+
+            // DEVICE
+            $table->string('fcm_token')->nullable();
+
+            // OTP
+            $table->string('otp', 50)->nullable();
+            $table->dateTime('otp_expires_at')->nullable();
+            $table->dateTime('otp_verified_at')->nullable();
+
+            // salon barbar
+           $table->foreignId('salon_id')
+                    ->nullable()
+                    ->constrained('users')
+                    ->onDelete('set null')
+                    ->comment('For salon barbers');
+            $table->boolean('salon_barbar_status')->default(false);
+
+            // PASSWORD RESET
+            $table->string('reset_password_token')->nullable();
+            $table->dateTime('reset_password_token_expires_at')->nullable();
+
+            // ROLE SYSTEM (UNIFIED)
+            $table->enum('role', [
+                'superadmin',
+                'admin',
+                'home_barbar',
+                'salon',
+                'salon_barbar',
+                'customer',
+
+            ])->default('customer');
+
+            // STATUS
+            $table->enum('block_status', ['blocked', 'unblock'])->default('unblock');
+            $table->boolean('is_verified')->default(false);
+            $table->boolean('is_agree')->default(true);
+            $table->enum('status', [
+                    'pending',
+                    'approved',
+                    'cancel'
+                ])->default('pending');
+            // ACCOUNT DELETE
+            $table->text('account_delete_reason')->nullable();
+            $table->text('account_delete_comment')->nullable();
+
+            $table->boolean('availability')->default(true);
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
         });
