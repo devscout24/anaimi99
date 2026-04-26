@@ -11,8 +11,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/user-login', 'login');
     Route::post('/signup', 'signup');
     Route::post('/user-logout', 'logout');
-   
-    
+
+
 
     Route::post('forget/password', 'forgetPassword');
     Route::post('otp/check', 'checkOtp');
@@ -23,13 +23,7 @@ Route::controller(AuthController::class)->group(function () {
 
 
 
-<<<<<<< HEAD
 Route::middleware('auth:api')->group(function () {
-=======
-
-require __DIR__ . '/Shahin.php';
->>>>>>> d96f7d76e793b7939265357e5d42f09d4d284451
-
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/user/profile/set', 'userProfileSet');
