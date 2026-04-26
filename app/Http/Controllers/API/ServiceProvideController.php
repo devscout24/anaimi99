@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\AvailablityDay;
 use App\Models\Service;
 use App\Models\ServicePrice;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class ServiceProviderController extends Controller
+class ServiceProvideController extends Controller
 {
     use ApiResponse;
 
@@ -35,7 +37,7 @@ class ServiceProviderController extends Controller
             return $this->success($servicesPrices, 'Service Price list fetched successfully');
         } catch (\Throwable $e) {
 
-            \Log::error('Service Price Error: ' . $e->getMessage());
+            Log::error('Service Price Error: ' . $e->getMessage());
 
             return $this->error(
                 null,
@@ -43,6 +45,30 @@ class ServiceProviderController extends Controller
                 500
             );
         }
+    }
+
+
+    public function availabilityIndex()
+    {
+        try {
+            $availabilityDays = AvailablityDay::query()
+                ->select('day_name')
+                ->distinct()
+                ->orderBy('day_name')
+                ->get();
+
+            return $this->success($availabilityDays, 'Availability days fetched successfully');
+        } catch (\Throwable $e) {
+
+            Log::error('Availability Days Error: ' . $e->getMessage());
+
+            return $this->error(
+                null,
+                'Something went wrong while fetching availability days',
+                500
+            );
+        }
+
     }
 
     

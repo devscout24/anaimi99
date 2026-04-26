@@ -146,6 +146,24 @@
                     </li>
 
 
+                    {{-- availability days --}}
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->routeIs('admin.availability-days.*') ? '' : 'collapsed' }}" href="#sidebarAvailabilityDays" data-bs-toggle="collapse" role="button"
+                            aria-expanded="{{ request()->routeIs('admin.availability-days.*') ? 'true' : 'false' }}" aria-controls="sidebarAvailabilityDays">
+                            <i class="ri-calendar-line"></i> <span>Availability Days</span>
+                        </a>
+                        <div class="collapse menu-dropdown {{ request()->routeIs('admin.availability-days.*') ? 'show' : '' }}" id="sidebarAvailabilityDays">
+                            <ul class="nav nav-sm flex-column">
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.availability-days.index') }}" class="nav-link {{ request()->routeIs('admin.availability-days.index') ? 'active' : '' }}">
+                                        All Availability Days
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+
 
                  {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Pages</span></li> --}}
 
