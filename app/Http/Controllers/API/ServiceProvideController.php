@@ -32,7 +32,7 @@ class ServiceProvideController extends Controller
     public function servicePriceIndex()
     {
         try {
-            $servicesPrices = ServicePrice::all();
+            $servicesPrices = ServicePrice::where('created_for_type','barber')->get();
 
             return $this->success($servicesPrices, 'Service Price list fetched successfully');
         } catch (\Throwable $e) {
@@ -71,5 +71,5 @@ class ServiceProvideController extends Controller
 
     }
 
-    
+
 }

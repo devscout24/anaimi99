@@ -103,21 +103,22 @@ class AuthController extends Controller
            
            }
 
-            if ($request->experience) {
+            // providerprofile শুধু salon/home_barbar/salon_barbar এর জন্য
+            $validProviderRoles = ['salon', 'home_barbar', 'salon_barbar'];
+            $requestedRole      = $request->role ?? 'customer';
+            $requestedUserType  = $request->user_type ?? null;
+
+            // valid user_type না হলে role থেকে নেব, তাও invalid হলে skip করব
+            $resolvedUserType = in_array($requestedUserType, $validProviderRoles)
+                                    ? $requestedUserType
+                                    : (in_array($requestedRole, $validProviderRoles) ? $requestedRole : null);
+
+            if ($resolvedUserType && ($request->experience || in_array($requestedRole, $validProviderRoles))) {
                 $user->providerprofiles()->create([
-                    'experience' => $request->experience,
-                    'user_type' => $request->user_type ?? 'home_barbar',
-                    'user_id' => $user->id
-                ]);
-            }
-
-
-            if ($request->role == 'customer') {
-                $user->providerprofiles()->create([
-                    'postal_code' => $request->postal_code,
-                    'user_type' => 'customer',
-                    'user_id' => $user->id
-
+                    'experience'  => $request->experience ?? null,
+                    'user_type'   => $resolvedUserType,
+                    'postal_code' => $request->postal_code ?? null,
+                    'user_id'     => $user->id,
                 ]);
             }
 

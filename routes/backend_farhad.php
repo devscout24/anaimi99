@@ -10,6 +10,7 @@ use App\Http\Controllers\Backend\Setting\SocialSettingController;
 use App\Http\Controllers\Backend\Setting\StripeSettingController;
 use App\Http\Controllers\Backend\Setting\SystemSettingController;
 use App\Http\Controllers\Backend\Setting\ProfileSettingController;
+use App\Http\Controllers\Backend\Setting\CommissionSettingController;
 
 Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
 
@@ -49,6 +50,10 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
     // Stripe Settings routes
     Route::get('stripe/settings', [StripeSettingController::class, 'edit'])->name('stripe-settings.edit');
     Route::post('stripe/settings', [StripeSettingController::class, 'update'])->name('stripe-settings.update');
+
+    // Commission Settings routes
+    Route::get('commission/settings', [CommissionSettingController::class, 'edit'])->name('commission-settings.edit');
+    Route::post('commission/settings', [CommissionSettingController::class, 'update'])->name('commission-settings.update');
 
     // Systems routes
     Route::get('system/settings', [SystemSettingController::class, 'edit'])->name('system-settings.edit');

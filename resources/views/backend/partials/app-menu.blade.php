@@ -197,14 +197,14 @@
 
                  {{-- Settings Section --}}
                  <li class="nav-item">
-                     <a class="nav-link menu-link {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') ? '' : 'collapsed' }}"
+                     <a class="nav-link menu-link {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') || request()->routeIs('admin.commission-settings.*') ? '' : 'collapsed' }}"
                          href="#sidebarSettings" data-bs-toggle="collapse" role="button"
-                         aria-expanded="{{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') ? 'true' : 'false' }}"
+                         aria-expanded="{{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') || request()->routeIs('admin.commission-settings.*') ? 'true' : 'false' }}"
                          aria-controls="sidebarSettings">
                          <i class="ri-settings-3-line"></i> <span>Settings</span>
                      </a>
 
-                     <div class="collapse menu-dropdown {{ request()->routeIs('admin.stripe-settings.*') || request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') || request()->routeIs('admin.social-settings.*') ? 'show' : '' }}"
+                     <div class="collapse menu-dropdown {{ request()->routeIs('admin.stripe-settings.*') || request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') || request()->routeIs('admin.social-settings.*') || request()->routeIs('admin.commission-settings.*') ? 'show' : '' }}"
                          id="sidebarSettings">
 
                          <ul class="nav nav-sm flex-column">
@@ -226,6 +226,13 @@
                              <li class="nav-item">
                                  <a href="{{ route('admin.stripe-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.stripe-settings.*') ? 'active' : '' }}">
                                      <i class="ri-mail-settings-line"></i> <span>Stripe Settings</span>
+                                 </a>
+                             </li>
+
+                             {{-- Commission Settings --}}
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.commission-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.commission-settings.*') ? 'active' : '' }}">
+                                     <i class="ri-percent-line"></i> <span>Commission Settings</span>
                                  </a>
                              </li>
 
