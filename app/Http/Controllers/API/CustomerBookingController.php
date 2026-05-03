@@ -27,6 +27,8 @@ class CustomerBookingController extends Controller
     public function bookingslotscustomer(Request $request)
     {
 
+     
+
         $validator = Validator::make($request->all(), [
 
             'date' => 'required|date',

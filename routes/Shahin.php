@@ -7,17 +7,22 @@ use App\Http\Controllers\Api\BankstatementController;
 use App\Http\Controllers\Api\BarberBookingController;
 use App\Http\Controllers\Api\BarberschedulebookingController;
 use App\Http\Controllers\API\BookingActionController;
+use App\Http\Controllers\Api\BookingStatusManageController;
 use App\Http\Controllers\Api\CustomerBookingController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SalonBarberAddController;
-use App\Http\Controllers\Api\SalonCustomBookingController;
 
+use App\Http\Controllers\Api\SalonBarberBookingScheduleList;
+use App\Http\Controllers\Api\SalonCustomBookingController;
 use App\Http\Controllers\Api\SalonOrBarberController;
 use App\Http\Controllers\Api\SalonPriceSetcontroller;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
+
+
 
 
 
@@ -67,9 +72,24 @@ Route::controller(ScheduleController::class)->group(function () {
 
 Route::controller(BarberBookingController::class)->group(function () {
     Route::post('barber/home/booking/list','bookingList');
+
     Route::get('barber/home/booking/details/{id}','bookingDetails');
 
-    Route::get('')
+    Route::get('barber/home/dashboard', 'dashboard');
+    Route::get('barber/home/booking/history', 'bookingHistory');
+});
+
+Route::controller(BookingStatusManageController::class)->group(function (){
+    Route::post('booking/status/change/{id}', 'changeStatus');
+
+    Route::post('/booking/completed/by','completedBooking');
+    Route::get('booking/completed/by/{id}','DetailsBooking');
+});
+
+Route::controller(InvoiceController::class)->group(function () {
+    Route::get('invoices', 'index');
+    Route::get('invoice/details/{id}', 'details');
+    Route::get('invoice/download/{id}', 'download');
 });
 
 
@@ -96,6 +116,20 @@ Route::controller(BarberBookingController::class)->group(function () {
 
 
  });
+
+
+ ////////salon barber wise booking schedule list///////////////
+Route::controller(SalonBarberBookingScheduleList::class)->group(function(){
+
+Route::get('salon/barber/booking/schedule/list', 'salonBarberBookingScheduleList');
+
+Route::get('salon/barbar/booking/details/{id}', 'salonBarbarBookingDetails');
+
+});
+
+
+
+
 
 
 
@@ -126,6 +160,8 @@ Route::controller(BookingActionController::class)->group(function () {
     Route::post('barber/booking/accept/{id}', 'acceptAsapBooking');
     Route::post('barber/booking/reject/{id}', 'rejectAsapBooking');
 });
+
+
 
 
 //////////////////////Admin Panel/////////////////////

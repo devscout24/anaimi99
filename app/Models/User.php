@@ -174,4 +174,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+
+    public function customer_loyality(){
+        return $this->hasMany(LoyalityAdd::class, 'customer_id');
+    }
+
+    
 }

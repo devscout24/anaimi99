@@ -8,6 +8,16 @@ class Booking extends Model
 {
     protected $guarded = [];
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($booking) {
+            $latest = self::latest('id')->first();
+            $nextId = $latest ? $latest->id + 1 : 1;
+            $booking->invoice_no = 'INV-' . (1000 + $nextId);
+        });
+    }
+
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
@@ -26,5 +36,9 @@ class Booking extends Model
     public function slots()
     {
         return $this->hasMany(BookingTimeMange::class, 'booking_id');
+    }
+
+    public function bookingLoyality(){
+         return $this->hasOne(LoyalityAdd::class,'booking_id');
     }
 }

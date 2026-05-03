@@ -192,6 +192,13 @@
                      </div>
                  </li> --}}
 
+                 {{-- Loyalty Points --}}
+                 <li class="nav-item">
+                     <a class="nav-link menu-link {{ request()->routeIs('admin.loyalty-setting.*') ? 'active' : '' }}" href="{{ route('admin.loyalty-setting.edit') }}">
+                         <i class="ri-medal-line"></i> <span>Loyalty Management</span>
+                     </a>
+                 </li>
+
                  {{-- Settings --}}
                  <li class="menu-title"><span data-key="t-menu">Settings</span></li>
 

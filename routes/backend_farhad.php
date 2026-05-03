@@ -59,6 +59,10 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
     Route::get('system/settings', [SystemSettingController::class, 'edit'])->name('system-settings.edit');
     Route::post('system/settings', [SystemSettingController::class, 'update'])->name('system-settings.update');
 
+    // Loyalty setting routes
+    Route::get('loyalty-setting', [\App\Http\Controllers\Backend\Farhad\LoyaltySettingController::class, 'edit'])->name('loyalty-setting.edit');
+    Route::put('loyalty-setting', [\App\Http\Controllers\Backend\Farhad\LoyaltySettingController::class, 'update'])->name('loyalty-setting.update');
+
     //Status
     Route::post('/update-status', [StatusController::class, 'update'])->name('status.update');
 });
