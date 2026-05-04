@@ -9,18 +9,25 @@ use App\Http\Controllers\Api\BarberschedulebookingController;
 use App\Http\Controllers\API\BookingActionController;
 use App\Http\Controllers\Api\BookingStatusManageController;
 use App\Http\Controllers\Api\CustomerBookingController;
+use App\Http\Controllers\Api\CustomerReservationController;
+use App\Http\Controllers\Api\CustomerReviewRatingController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\SalonBarberAddController;
 
+use App\Http\Controllers\Api\SalonBarberAddController;
 use App\Http\Controllers\Api\SalonBarberBookingScheduleList;
 use App\Http\Controllers\Api\SalonCustomBookingController;
+use App\Http\Controllers\Api\SalonInvoiceController;
 use App\Http\Controllers\Api\SalonOrBarberController;
 use App\Http\Controllers\Api\SalonPriceSetcontroller;
+use App\Http\Controllers\Api\SalonProfileController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
+
+
+
 
 
 
@@ -127,7 +134,11 @@ Route::get('salon/barbar/booking/details/{id}', 'salonBarbarBookingDetails');
 
 });
 
+Route::get('salon/report', [\App\Http\Controllers\Api\ReportController::class, 'index']);
 
+Route::controller(SalonProfileController::class)->group(function () {
+    Route::get('salon/profile/{type}', 'getProfile');
+});
 
 
 
@@ -135,6 +146,22 @@ Route::get('salon/barbar/booking/details/{id}', 'salonBarbarBookingDetails');
 
 
 ////////////////////////////////////////customer///////////////////////
+
+
+Route::controller(CustomerReservationController::class)->group(function(){
+    Route::get('customer/reservation', 'customerReservation');
+    Route::get('customer/reservation/details/{id}', 'customerReservationDetails');
+    Route::get('customer/booking/details/{id}','customerbookingDetails');
+});
+
+
+
+
+
+
+
+
+
 
 //////////////////////Salon or Barber – Location Based/////////////////////
 Route::controller(SalonOrBarberController::class)->group(function () {
@@ -162,7 +189,24 @@ Route::controller(BookingActionController::class)->group(function () {
 });
 
 
+ Route::controller(CustomerReviewRatingController::class)->group(function () {
+    Route::post('customer/review/rating', 'customerReviewRating');
+    Route::get('customer/review/rating', 'customerReviewRatingList');
+    Route::get('customer/review/rating/{id}', 'customerReviewRatingDetails');
+    Route::post('customer/review/rating/{id}', 'customerReviewRatingUpdate');
 
+ });
+
+ Route::controller(SalonInvoiceController::class)->group(function () {
+    Route::get('salon/invoices', 'index');
+    Route::get('salon/invoices/{id}', 'details');
+    Route::get('salon/invoices/download/{id}', 'download');
+
+    // New Periodic (Bi-monthly) Routes
+    Route::get('salon/period-invoices', 'periodIndex');
+    Route::get('salon/period-invoices/details/{id}', 'periodDetails');
+    Route::get('salon/period-invoices/download/{id}', 'periodDownload');
+ });
 
 //////////////////////Admin Panel/////////////////////
 Route::controller(AdminPaymentController::class)->group(function () {

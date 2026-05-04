@@ -14,7 +14,7 @@ class InvoiceController extends Controller
     use ApiResponse;
 
     /**
-     * List all invoices for the authenticated customer.
+     * List all invoices for the authenticated customer/barber.
      */
     public function index()
     {
@@ -119,7 +119,6 @@ class InvoiceController extends Controller
                 ->where('id', $id)
                 ->firstOrFail();
 
-            // Return a clean HTML view that can be printed or saved as PDF
             return view('invoices.template', compact('booking'));
         } catch (\Exception $e) {
             return abort(404, 'Invoice not found');

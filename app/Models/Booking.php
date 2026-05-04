@@ -41,4 +41,9 @@ class Booking extends Model
     public function bookingLoyality(){
          return $this->hasOne(LoyalityAdd::class,'booking_id');
     }
+
+    public function salon(){
+        return $this->belongsTo(User::class,'salon_id');
+    }
+
 }

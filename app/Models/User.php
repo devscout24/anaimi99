@@ -180,5 +180,13 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(LoyalityAdd::class, 'customer_id');
     }
 
-    
+
+    public function barberbooking(){
+        return $this->hasMany(Booking::class,'barbar_id');
+    }
+
+    public function salonbooking(){
+        return $this->hasMany(Booking::class,'salon_id');
+    }
+
 }

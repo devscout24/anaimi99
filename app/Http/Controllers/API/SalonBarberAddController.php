@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TempPasswordMail;
+use App\Models\Booking;
 use App\Models\User;
 use App\Traits\ApiResponse;
 
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use Carbon\Carbon;
 class SalonBarberAddController extends Controller
 {
 
@@ -135,9 +136,9 @@ public function getBarberDetails($id)
         }
 
 
-        // $todaysacceptBooking
+         $todaysacceptBooking=Booking::query()->where('salon_id', Auth::id())->where('barber_id', $id)->where('status', 'accepted')->whereDate('created_at', Carbon::today())->count();
 
-        // $todayscompletebooking
+         $todayscompletebooking=Booking::query()->where('salon_id', Auth::id())->where('barber_id', $id)->where('status', 'completed')->whereDate('created_at', Carbon::today())->count();
 
 
 
@@ -146,6 +147,8 @@ public function getBarberDetails($id)
             'name' => $barber->name,
             'email' => $barber->email,
             'phone' => $barber->phone,
+            'todays_accept_booking'=>$todaysacceptBooking,
+            'todays_complete_booking'=>$todayscompletebooking,
             'salon_id' => $barber->salon_id,
             'profile_image' => $barber->profile_image
                 ? asset($barber->profile_image)
