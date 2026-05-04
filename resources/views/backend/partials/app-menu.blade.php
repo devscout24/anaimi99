@@ -215,6 +215,13 @@
                                  </a>
                              </li>
 
+                             {{-- dynamic pages --}}
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.dynamic.index') }}" class="nav-link {{ request()->routeIs('admin.dynamic.*') ? 'active' : '' }}">
+                                     <i class="ri-pages-line"></i> <span>Dynamic Pages</span>
+                                 </a>
+                             </li>
+
                              {{-- Social Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.social-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.social-settings.*') ? 'active' : '' }}">

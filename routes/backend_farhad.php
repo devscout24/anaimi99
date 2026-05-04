@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Backend\abdullah\DynamicController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\Farhad\StatusController;
 use App\Http\Controllers\Backend\Farhad\ProductController;
@@ -56,4 +57,13 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
 
     //Status
     Route::post('/update-status', [StatusController::class, 'update'])->name('status.update');
+
+
+    // dynamic routes
+    Route::get('dynamic/index', [DynamicController::class, 'index'])->name('dynamic.index');
+    Route::get('dynamic/create', [DynamicController::class, 'create'])->name('dynamic.create');
+    Route::post('dynamic/store', [DynamicController::class, 'store'])->name('dynamic.store');
+    Route::get('dynamic/{id}/edit', [DynamicController::class, 'edit'])->name('dynamic.edit');
+    Route::put('dynamic/{id}', [DynamicController::class, 'update'])->name('dynamic.update');
+    Route::delete('dynamic/{id}', [DynamicController::class, 'destroy'])->name('dynamic.destroy');
 });
