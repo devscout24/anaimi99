@@ -71,49 +71,9 @@
                  <!--  Menu -->
                  <li class="menu-title"><span data-key="t-menu">Menu</span></li>
 
-                 <!-- Manage Clients -->
-                 <li class="nav-item">
-                     <a class="nav-link menu-link {{ request()->routeIs('admin.manage.*') ? '' : 'collapsed' }}" href="#sidebarManageClients" data-bs-toggle="collapse" role="button"
-                         aria-expanded="{{ request()->routeIs('admin.manage.*') ? 'true' : 'false' }}" aria-controls="sidebarManageClients">
-                         <i class="ri-user-settings-line"></i> <span data-key="t-manage-clients">Manage Clients</span>
-                     </a>
-                     <div class="collapse menu-dropdown {{ request()->routeIs('admin.manage.*') ? 'show' : '' }}" id="sidebarManageClients">
-                         <ul class="nav nav-sm flex-column">
-                             <li class="nav-item">
-                                 <a href="{{ route('admin.manage.salons') }}" class="nav-link {{ request()->routeIs('admin.manage.salons') ? 'active' : '' }}">
-                                     Manage Salons
-                                 </a>
-                             </li>
-                             <li class="nav-item">
-                                 <a href="{{ route('admin.manage.barbers') }}" class="nav-link {{ request()->routeIs('admin.manage.barbers') ? 'active' : '' }}">
-                                     Manage Barbers
-                                 </a>
-                             </li>
-                         </ul>
-                     </div>
-                 </li>
 
-                 <!-- Reports & Financials -->
-                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? '' : 'collapsed' }}" href="#sidebarReports" data-bs-toggle="collapse" role="button"
-                        aria-expanded="{{ request()->routeIs('admin.reports.*') ? 'true' : 'false' }}" aria-controls="sidebarReports">
-                        <i class="ri-file-chart-line"></i> <span data-key="t-reports">Reports & Finance</span>
-                    </a>
-                    <div class="collapse menu-dropdown {{ request()->routeIs('admin.reports.*') ? 'show' : '' }}" id="sidebarReports">
-                        <ul class="nav nav-sm flex-column">
-                            <li class="nav-item">
-                                <a href="{{ route('admin.reports.transactions') }}" class="nav-link {{ request()->routeIs('admin.reports.transactions') ? 'active' : '' }}">
-                                    All Transactions
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.reports.providers') }}" class="nav-link {{ request()->routeIs('admin.reports.providers') ? 'active' : '' }}">
-                                    Provider Reports
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+
+
 
                  <!-- Dashboard -->
                  <li class="nav-item">
@@ -168,41 +128,29 @@
 
 
                  {{-- service --}}
-                    <li class="nav-item">
-                        <a class="nav-link menu-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}" href="{{ route('admin.services.index') }}">
-                            <i class="ri-service-line"></i> <span>Service</span>
-                        </a>
-                        <ul class="mt-2 nav nav-sm flex-column ps-4">
-                            <li class="nav-item">
-                                <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
-                                    All Services
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.service-prices.index') }}" class="nav-link {{ request()->routeIs('admin.service-prices.index') ? 'active' : '' }}">
-                                    Service Prices
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                 <li class="nav-item">
+                     <a class="nav-link menu-link {{ request()->is('admin/services*') || request()->is('admin/service-prices*') ? '' : 'collapsed' }}" href="#sidebarService" data-bs-toggle="collapse" role="button"
+                         aria-expanded="{{ request()->is('admin/services*') || request()->is('admin/service-prices*') ? 'true' : 'false' }}" aria-controls="sidebarService">
+                         <i class="ri-service-line"></i> <span>Service</span>
+                     </a>
+                     <div class="collapse menu-dropdown {{ request()->is('admin/services*') || request()->is('admin/service-prices*') ? 'show' : '' }}" id="sidebarService">
+                         <ul class="nav nav-sm flex-column">
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
+                                     All Services
+                                 </a>
+                             </li>
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.service-prices.index') }}" class="nav-link {{ request()->routeIs('admin.service-prices.index') ? 'active' : '' }}">
+                                     Service Prices
+                                 </a>
+                             </li>
+                         </ul>
+                     </div>
+                 </li>
 
 
-                    {{-- availability days --}}
-                    <li class="nav-item">
-                        <a class="nav-link menu-link {{ request()->routeIs('admin.availability-days.*') ? '' : 'collapsed' }}" href="#sidebarAvailabilityDays" data-bs-toggle="collapse" role="button"
-                            aria-expanded="{{ request()->routeIs('admin.availability-days.*') ? 'true' : 'false' }}" aria-controls="sidebarAvailabilityDays">
-                            <i class="ri-calendar-line"></i> <span>Availability Days</span>
-                        </a>
-                        <div class="collapse menu-dropdown {{ request()->routeIs('admin.availability-days.*') ? 'show' : '' }}" id="sidebarAvailabilityDays">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.availability-days.index') }}" class="nav-link {{ request()->routeIs('admin.availability-days.index') ? 'active' : '' }}">
-                                        All Availability Days
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+
 
 
 
@@ -242,6 +190,89 @@
                          <i class="ri-medal-line"></i> <span>Loyalty Management</span>
                      </a>
                  </li>
+
+
+
+
+
+                  <!-- Manage Clients -->
+                 <li class="nav-item">
+                     <a class="nav-link menu-link {{ request()->routeIs('admin.manage.*') ? '' : 'collapsed' }}" href="#sidebarManageClients" data-bs-toggle="collapse" role="button"
+                         aria-expanded="{{ request()->routeIs('admin.manage.*') ? 'true' : 'false' }}" aria-controls="sidebarManageClients">
+                         <i class="ri-user-settings-line"></i> <span data-key="t-manage-clients">Manage Clients</span>
+                     </a>
+                     <div class="collapse menu-dropdown {{ request()->routeIs('admin.manage.*') ? 'show' : '' }}" id="sidebarManageClients">
+                         <ul class="nav nav-sm flex-column">
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.manage.salons') }}" class="nav-link {{ request()->routeIs('admin.manage.salons') ? 'active' : '' }}">
+                                     Manage Salons
+                                 </a>
+                             </li>
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.manage.barbers') }}" class="nav-link {{ request()->routeIs('admin.manage.barbers') ? 'active' : '' }}">
+                                     Manage Barbers
+                                 </a>
+                             </li>
+                         </ul>
+                     </div>
+                 </li>
+
+
+                    <!-- Reports & Financials -->
+                 <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? '' : 'collapsed' }}" href="#sidebarReports" data-bs-toggle="collapse" role="button"
+                        aria-expanded="{{ request()->routeIs('admin.reports.*') ? 'true' : 'false' }}" aria-controls="sidebarReports">
+                        <i class="ri-file-chart-line"></i> <span data-key="t-reports">Reports & Finance</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ request()->routeIs('admin.reports.*') ? 'show' : '' }}" id="sidebarReports">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.transactions') }}" class="nav-link {{ request()->routeIs('admin.reports.transactions') ? 'active' : '' }}">
+                                    All Transactions
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.providers') }}" class="nav-link {{ request()->routeIs('admin.reports.providers') ? 'active' : '' }}">
+                                    Provider Reports
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.bookings') }}" class="nav-link {{ request()->routeIs('admin.reports.bookings') ? 'active' : '' }}">
+                                    Booking Report
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.revenue') }}" class="nav-link {{ request()->routeIs('admin.reports.revenue') ? 'active' : '' }}">
+                                    Revenue Report
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.loyalty') }}" class="nav-link {{ request()->routeIs('admin.reports.loyalty') ? 'active' : '' }}">
+                                    Loyalty Report
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.analytics') }}" class="nav-link {{ request()->routeIs('admin.reports.analytics') ? 'active' : '' }}">
+                                    Business Analytics
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+
+
+
+
+                 <li class="nav-item">
+                     <a class="nav-link menu-link {{ request()->routeIs('admin.chat.view') ? 'active' : '' }}" href="{{ route('admin.chat.view') }}">
+                         <i class="ri-chat-3-line"></i> <span>Chat</span>
+                     </a>
+                 </li>
+
+
+
+
 
                  {{-- Settings --}}
                  <li class="menu-title"><span data-key="t-menu">Settings</span></li>

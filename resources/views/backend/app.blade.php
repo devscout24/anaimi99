@@ -13,6 +13,7 @@
     <link rel="shortcut icon" href="{{ asset($systemSetting->favicon) }}">
 
     @include('backend.partials.styles')
+    {{--  @vite('resources/js/app.js')  --}}
     @stack('styles')
 
 </head>

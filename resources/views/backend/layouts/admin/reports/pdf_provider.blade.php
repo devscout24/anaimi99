@@ -25,9 +25,9 @@
                 <th>Date</th>
                 <th>Booking ID</th>
                 <th>Type</th>
-                <th>Total Amount</th>
-                <th>Admin Comm.</th>
-                <th>Provider Earn</th>
+                <th>Total Amount (€)</th>
+                <th>Admin Comm. (€)</th>
+                <th>Provider Earn (€)</th>
             </tr>
         </thead>
         <tbody>
@@ -46,14 +46,14 @@
 
     <div class="summary">
         <h3>Summary Statistics</h3>
-        <div class="summary-item">Total Online Payments: <strong>{{ number_format($stats['online'], 2) }}</strong></div>
-        <div class="summary-item">Total COD: <strong>{{ number_format($stats['cod'], 2) }}</strong></div>
-        <div class="summary-item">Total Onsite: <strong>{{ number_format($stats['onsite'], 2) }}</strong></div>
-        <div class="summary-item">Total Custom: <strong>{{ number_format($stats['custom'], 2) }}</strong></div>
+        <div class="summary-item">Total Online Payments: <strong>€{{ number_format($stats['online'], 2) }}</strong></div>
+        <div class="summary-item">Total COD: <strong>€{{ number_format($stats['cod'], 2) }}</strong></div>
+        <div class="summary-item">Total Onsite: <strong>€{{ number_format($stats['onsite'], 2) }}</strong></div>
+        <div class="summary-item">Total Custom: <strong>€{{ number_format($stats['custom'], 2) }}</strong></div>
         <hr>
-        <div class="summary-item">Gross Total: <strong>{{ number_format($stats['total_amount'], 2) }}</strong></div>
-        <div class="summary-item">Total Admin Commission (Revenue): <strong style="color: red;">{{ number_format($stats['total_commission'], 2) }}</strong></div>
-        <div class="summary-item">Total Provider Net Earnings: <strong style="color: green;">{{ number_format($stats['provider_earnings'], 2) }}</strong></div>
+        <div class="summary-item">Gross Total: <strong>€{{ number_format($stats['total_amount'], 2) }}</strong></div>
+        <div class="summary-item">Total Admin Commission (Revenue): <strong style="color: red;">€{{ number_format($stats['total_commission'], 2) }}</strong></div>
+        <div class="summary-item">Total Provider Net Earnings: <strong style="color: green;">€{{ number_format($stats['provider_earnings'], 2) }}</strong></div>
     </div>
 </body>
 </html>

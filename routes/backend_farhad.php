@@ -1,19 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Backend\Farhad\StatusController;
-use App\Http\Controllers\Backend\Farhad\ProductController;
-use App\Http\Controllers\Backend\Farhad\CategoryController;
-use App\Http\Controllers\Backend\Farhad\DashboardController;
-use App\Http\Controllers\Backend\Setting\MailSettingController;
-use App\Http\Controllers\Backend\Setting\SocialSettingController;
-use App\Http\Controllers\Backend\Setting\StripeSettingController;
-use App\Http\Controllers\Backend\Setting\SystemSettingController;
-use App\Http\Controllers\Backend\Setting\ProfileSettingController;
-use App\Http\Controllers\Backend\Setting\CommissionSettingController;
 use App\Http\Controllers\Backend\Admin\ClientManagementController;
 use App\Http\Controllers\Backend\Admin\ReportController;
 use App\Http\Controllers\Backend\Admin\ReportDownloadController;
+use App\Http\Controllers\Backend\AdminChatController;
+use App\Http\Controllers\Backend\Farhad\CategoryController;
+use App\Http\Controllers\Backend\Farhad\DashboardController;
+use App\Http\Controllers\Backend\Farhad\ProductController;
+use App\Http\Controllers\Backend\Farhad\StatusController;
+use App\Http\Controllers\Backend\Setting\CommissionSettingController;
+use App\Http\Controllers\Backend\Setting\MailSettingController;
+use App\Http\Controllers\Backend\Setting\ProfileSettingController;
+use App\Http\Controllers\Backend\Setting\SocialSettingController;
+use App\Http\Controllers\Backend\Setting\StripeSettingController;
+use App\Http\Controllers\Backend\Setting\SystemSettingController;
+use Illuminate\Support\Facades\Route;
+
 
 Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
 
@@ -21,6 +23,10 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
     Route::controller(ReportController::class)->prefix('reports')->name('reports.')->group(function () {
         Route::get('transactions', 'transactions')->name('transactions');
         Route::get('provider-reports', 'providerReports')->name('providers');
+        Route::get('booking-report', 'bookingReport')->name('bookings');
+        Route::get('revenue-report', 'revenueReport')->name('revenue');
+        Route::get('analytics', 'analyticReports')->name('analytics');
+        Route::get('loyalty-report', 'loyaltyReport')->name('loyalty');
         Route::get('download-pdf/{id}', [ReportDownloadController::class, 'downloadProviderPdf'])->name('download-pdf');
     });
 
@@ -83,4 +89,15 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
 
     //Status
     Route::post('/update-status', [StatusController::class, 'update'])->name('status.update');
+
+
+    Route::controller(AdminChatController::class)->group(function () {
+        Route::get('/chat/view/blade', 'chatViewBlade')->name('chat.view');
+        Route::get('/chat/admin/list', 'chatList')->name('chat.list');
+        Route::get('/chat/fetch/admin/{receiver_id}', 'fetchConversation')->name('chat.fetch');
+        Route::post('/chat/admin/send', 'sendMessage')->name('chat.send');
+        Route::get('/chat/mark/read/admin/{conversation_id}', 'markAsRead')->name('chat.mark.read');
+        Route::get('/chat/admin/delete/{chat_id}', 'chatDelete')->name('chat.delete');
+        Route::get('/chat/admin/image/delete/{image_id}', 'chatImageDelete')->name('chat.image.delete');
+    });
 });

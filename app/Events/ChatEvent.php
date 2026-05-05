@@ -25,9 +25,12 @@ class ChatEvent implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        Log::info('enter broadcast: '.$this->chat->conversation_id);
+        Log::info('Broadcasting ChatEvent on: chat-conversation.' . $this->chat->conversation_id);
 
-        return new PrivateChannel('chat-conversation.'.$this->chat->conversation_id);
+        return [
+            new PrivateChannel('chat-conversation.' . $this->chat->conversation_id),
+            new PrivateChannel('App.Models.User.' . $this->chat->receiver_id),
+        ];
     }
 
     public function broadcastAs()
