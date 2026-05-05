@@ -19,6 +19,12 @@
 
 <body>
 
+    @if (session('error'))
+        <div class="alert alert-danger" style="position: absolute; width: 100%; z-index: 9999;">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Begin page -->
     <div id="layout-wrapper">
 

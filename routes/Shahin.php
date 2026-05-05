@@ -11,10 +11,12 @@ use App\Http\Controllers\Api\BookingStatusManageController;
 use App\Http\Controllers\Api\CustomerBookingController;
 use App\Http\Controllers\Api\CustomerReservationController;
 use App\Http\Controllers\Api\CustomerReviewRatingController;
+use App\Http\Controllers\Api\HelpandSupportController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\Loyality;
-use App\Http\Controllers\Api\ProfileController;
 
+use App\Http\Controllers\Api\LoyalityBookingController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SalonBarberAddController;
 use App\Http\Controllers\Api\SalonBarberBookingScheduleList;
@@ -27,6 +29,8 @@ use App\Http\Controllers\Api\SalonProfileController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\Api\ChatController;
 
 
 
@@ -48,200 +52,213 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']
 Route::middleware('auth:api')->group(function () {
 
 
-Route::controller(ProfileController::class)->group(function () {
+    Route::controller(LoyalityBookingController::class)->group(function () {
+        Route::post('/loyalty-booking', 'loyaltyBooking');
+    });
 
-    Route::post('/profile/update','update');
-    Route::get('/user/profile/get', 'userProfileGet');
-    Route::post('/user/galery/image/delete/{id}', 'userGaleryImageDelete');
+    Route::controller(ProfileController::class)->group(function () {
 
-    Route::post('/user/available/controll', 'availableControll');
+        Route::post('/profile/update', 'update');
+        Route::get('/user/profile/get', 'userProfileGet');
+        Route::post('/user/galery/image/delete/{id}', 'userGaleryImageDelete');
 
-    Route::post('user/location/update', 'updateLocation');
-    Route::get('/user/business/details/get', 'userBusinessDetailsGet');
-    Route::post('/user/business/details/update', 'userBusinessDetailsUpdate');
-});
+        Route::post('/user/available/controll', 'availableControll');
 
-Route::controller(BankstatementController::class)->group(function () {
-    Route::post('/bank/statement/add/update', 'addBankStatement');
-    Route::get('/bank/statement/get', 'getBankStatement');
-});
-///////////////////common///////////////
-Route::controller(ScheduleController::class)->group(function () {
-    Route::post('/schedule/add', 'addSchedule');
-    Route::get('/schedule/get', 'getSchedule');
-    Route::post('/schedule/delete/{id}', 'deleteSchedule');
-    Route::post('schedule/block/slot', 'blockSlot');
-    Route::post('schedule/unblock/slot', 'unblockSlot');
+        Route::post('user/location/update', 'updateLocation');
+        Route::get('/user/business/details/get', 'userBusinessDetailsGet');
+        Route::post('/user/business/details/update', 'userBusinessDetailsUpdate');
+    });
 
-    Route::get('barber/salon/slots/{id}', 'barberSalonSlots');
+    Route::controller(BankstatementController::class)->group(function () {
+        Route::post('/bank/statement/add/update', 'addBankStatement');
+        Route::get('/bank/statement/get', 'getBankStatement');
+    });
+    ///////////////////common///////////////
+    Route::controller(ScheduleController::class)->group(function () {
+        Route::post('/schedule/add', 'addSchedule');
+        Route::get('/schedule/get', 'getSchedule');
+        Route::post('/schedule/delete/{id}', 'deleteSchedule');
+        Route::post('schedule/block/slot', 'blockSlot');
+        Route::post('schedule/unblock/slot', 'unblockSlot');
 
+        Route::get('barber/salon/slots/{id}', 'barberSalonSlots');
 
-    Route::get('barber/salon/slots/with/block/booking', 'barberSalonSlotsWithBooking');
-});
 
-// ////////////////////Home barber///////////////////////////////
+        Route::get('barber/salon/slots/with/block/booking', 'barberSalonSlotsWithBooking');
+    });
 
-Route::controller(BarberBookingController::class)->group(function () {
-    Route::post('barber/home/booking/list','bookingList');
+    // ////////////////////Home barber///////////////////////////////
 
-    Route::get('barber/home/booking/details/{id}','bookingDetails');
+    Route::controller(BarberBookingController::class)->group(function () {
+        Route::post('barber/home/booking/list', 'bookingList');
 
-    Route::get('barber/home/dashboard', 'dashboard');
-    Route::get('barber/home/booking/history', 'bookingHistory');
-});
+        Route::get('barber/home/booking/details/{id}', 'bookingDetails');
 
-Route::controller(BookingStatusManageController::class)->group(function (){
-    Route::post('booking/status/change/{id}', 'changeStatus');
+        Route::get('barber/home/dashboard', 'dashboard');
+        Route::get('barber/home/booking/history', 'bookingHistory');
+    });
 
-    Route::post('/booking/completed/by','completedBooking');
-    Route::get('booking/completed/by/{id}','DetailsBooking');
-});
+    Route::controller(BookingStatusManageController::class)->group(function () {
+        Route::post('booking/status/change/{id}', 'changeStatus');
 
-Route::controller(InvoiceController::class)->group(function () {
-    Route::get('invoices', 'index');
-    Route::get('invoice/details/{id}', 'details');
-    Route::get('invoice/download/{id}', 'download');
-});
+        Route::post('/booking/completed/by', 'completedBooking');
+        Route::get('booking/completed/by/{id}', 'DetailsBooking');
+    });
 
+    Route::controller(InvoiceController::class)->group(function () {
+        Route::get('invoices', 'index');
+        Route::get('invoice/details/{id}', 'details');
+        Route::get('invoice/download/{id}', 'download');
+    });
 
-//////////////////////salon/////////////////////////////////
-  Route::controller(SalonBarberAddController::class)->group(function () {
-    Route::post('/salon/barber/add', 'addSalonBarber');
-    Route::get('/salon/barber/list', 'SalonBarberlist');
-    Route::post('/salon/barber/delete/{id}', 'deleteSalonBarber');
-    Route::get('barber/{id}', 'getBarberDetails');
 
+    //////////////////////salon/////////////////////////////////
+    Route::controller(SalonBarberAddController::class)->group(function () {
+        Route::post('/salon/barber/add', 'addSalonBarber');
+        Route::get('/salon/barber/list', 'SalonBarberlist');
+        Route::post('/salon/barber/delete/{id}', 'deleteSalonBarber');
+        Route::get('barber/{id}', 'getBarberDetails');
 
-    Route::get('send/temporary/password/email/{id}', 'SendTempPassBarbar');
-  });
 
-  Route::controller(SalonPriceSetcontroller::class)->group(function () {
-    Route::post('/salon/price/set', 'addSalonPrice');
-    Route::get('/salon/price/get', 'getSalonPrice');
-    Route::post('/salon/price/delete/{id}', 'deleteSalonPrice');
-    Route::post('/salon/price/update/{id}', 'updateSalonPrice');
-  });
+        Route::get('send/temporary/password/email/{id}', 'SendTempPassBarbar');
+    });
 
- Route::controller(SalonCustomBookingController::class)->group(function () {
-    Route::post('/salon/custom/booking', 'salonCustomBooking');
+    Route::controller(SalonPriceSetcontroller::class)->group(function () {
+        Route::post('/salon/price/set', 'addSalonPrice');
+        Route::get('/salon/price/get', 'getSalonPrice');
+        Route::post('/salon/price/delete/{id}', 'deleteSalonPrice');
+        Route::post('/salon/price/update/{id}', 'updateSalonPrice');
+    });
 
+    Route::controller(SalonCustomBookingController::class)->group(function () {
+        Route::post('/salon/custom/booking', 'salonCustomBooking');
+    });
 
- });
 
 
+    Route::controller(SalonLoyalityController::class)->group(function () {
+        Route::post('/salon/loyalty/point/add/update', 'addLoyaltyPoints');
+        Route::get('/salon/loyalty/point/get', 'getLoyaltyPoints');
+    });
 
- Route::controller(SalonLoyalityController::class)->group(function () {
-    Route::post('/salon/loyalty/point/add/update', 'addLoyaltyPoints');
-    Route::get('/salon/loyalty/point/get', 'getLoyaltyPoints');
 
- });
+    ////////salon barber wise booking schedule list///////////////
+    Route::controller(SalonBarberBookingScheduleList::class)->group(function () {
 
+        Route::get('salon/barber/booking/schedule/list', 'salonBarberBookingScheduleList');
 
- ////////salon barber wise booking schedule list///////////////
-Route::controller(SalonBarberBookingScheduleList::class)->group(function(){
+        Route::get('salon/barbar/booking/details/{id}', 'salonBarbarBookingDetails');
+    });
 
-Route::get('salon/barber/booking/schedule/list', 'salonBarberBookingScheduleList');
+    Route::get('salon/report', [\App\Http\Controllers\Api\ReportController::class, 'index']);
 
-Route::get('salon/barbar/booking/details/{id}', 'salonBarbarBookingDetails');
+    Route::controller(SalonProfileController::class)->group(function () {
+        Route::get('salon/profile/{type}', 'getProfile');
+    });
 
-});
 
-Route::get('salon/report', [\App\Http\Controllers\Api\ReportController::class, 'index']);
 
-Route::controller(SalonProfileController::class)->group(function () {
-    Route::get('salon/profile/{type}', 'getProfile');
-});
 
 
 
+    ////////////////////////////////////////customer///////////////////////
 
 
+    Route::controller(CustomerReservationController::class)->group(function () {
+        Route::get('customer/reservation', 'customerReservation');
+        Route::get('customer/reservation/details/{id}', 'customerReservationDetails');
+        Route::get('customer/booking/details/{id}', 'customerbookingDetails');
 
-////////////////////////////////////////customer///////////////////////
+        Route::post('customer/reservation/cancel/{id}', 'customerCancelReservation');
+    });
 
 
-Route::controller(CustomerReservationController::class)->group(function(){
-    Route::get('customer/reservation', 'customerReservation');
-    Route::get('customer/reservation/details/{id}', 'customerReservationDetails');
-    Route::get('customer/booking/details/{id}','customerbookingDetails');
+    Route::controller(Loyality::class)->group(function () {
 
-    Route::post('customer/reservation/cancel/{id}', 'customerCancelReservation');
+        Route::get('loyalty/point/get/history', 'getLoyalityHistory');
 
+        Route::get('loyalty/point/get', 'getLoyaltyPoint');
 
+        Route::get('/salon/wise/loyalty/point/get/{salonId}', 'getSalonWiseLoyaltyPoints');
+    });
 
-});
 
+    Route::controller(LoyalityBookingController::class)->group(function () {
+        Route::post('loyalty/booking', 'loyaltyBooking');
+    });
 
-Route::controller(Loyality::class)->group(function(){
+    Route::controller(HelpandSupportController::class)->group(function () {
+      Route::post('help/support', 'submitHelpSupport');
+    });
 
-    Route::get('loyalty/point/get/history', 'getLoyalityHistory');
 
-    Route::get('loyalty/point/get', 'getLoyaltyPoint');
 
-      Route::get('/salon/wise/loyalty/point/get/{salonId}', 'getSalonWiseLoyaltyPoints');
+    //////////////////////Salon or Barber – Location Based/////////////////////
+    Route::controller(SalonOrBarberController::class)->group(function () {
+        // List: GET /salon-or-barber?latitude=&longitude=&search=&type=&available=1&radius=20&per_page=15
+        Route::post('salon-or-barber', 'index');
 
-});
+        // Details: GET /salon-or-barber/{id}?latitude=&longitude=
+        Route::get('salon-or-barber/{id}', 'show');
+    });
 
+    Route::controller(BarberschedulebookingController::class)->group(function () {
+        Route::post('booking/barber/slots', 'getSlots');
+    });
 
 
+    Route::controller(CustomerBookingController::class)->group(function () {
+        Route::post('customer/booking/slots', 'bookingslotscustomer');
+    });
 
+    Route::post('customer/booking/as-soon-as-possible', [AsSoonAsPossibleBookingController::class, 'asSoonAsPossibleBooking']);
 
+    Route::controller(BookingActionController::class)->group(function () {
+        Route::post('barber/booking/accept/{id}', 'acceptAsapBooking');
+        Route::post('barber/booking/reject/{id}', 'rejectAsapBooking');
+    });
 
 
+    Route::controller(CustomerReviewRatingController::class)->group(function () {
+        Route::post('customer/review/rating', 'customerReviewRating');
+        Route::get('customer/review/rating', 'customerReviewRatingList');
+        Route::get('customer/review/rating/{id}', 'customerReviewRatingDetails');
+        Route::post('customer/review/rating/{id}', 'customerReviewRatingUpdate');
+    });
 
-//////////////////////Salon or Barber – Location Based/////////////////////
-Route::controller(SalonOrBarberController::class)->group(function () {
-    // List: GET /salon-or-barber?latitude=&longitude=&search=&type=&available=1&radius=20&per_page=15
-    Route::post('salon-or-barber', 'index');
+    Route::controller(SalonInvoiceController::class)->group(function () {
+        Route::get('salon/invoices', 'index');
+        Route::get('salon/invoices/{id}', 'details');
+        Route::get('salon/invoices/download/{id}', 'download');
 
-    // Details: GET /salon-or-barber/{id}?latitude=&longitude=
-    Route::get('salon-or-barber/{id}', 'show');
-});
+        // New Periodic (Bi-monthly) Routes
+        Route::get('salon/period-invoices', 'periodIndex');
+        Route::get('salon/period-invoices/details/{id}', 'periodDetails');
+        Route::get('salon/period-invoices/download/{id}', 'periodDownload');
+    });
 
-Route::controller(BarberschedulebookingController::class)->group(function () {
-    Route::post('booking/barber/slots', 'getSlots');
-});
+    //////////////////////Admin Panel/////////////////////
+    Route::controller(AdminPaymentController::class)->group(function () {
+        Route::get('/admin/payments', 'index');
+        Route::get('/admin/payments/{id}', 'show');
+        Route::post('/admin/payments/{id}/status', 'updatePaymentStatus');
+        Route::get('/admin/commission/settings', 'getCommissionSettings');
+        Route::post('/admin/commission/settings', 'setCommissionSetting');
+    });
 
 
-Route::controller(CustomerBookingController::class)->group(function () {
-    Route::post('customer/booking/slots', 'bookingslotscustomer');
-});
+      Route::controller(ChatController::class)->group(function () {
+        Route::post('/chat/send', 'sendMessage');
+        Route::get('/chat/mark/read/{conversation_id}', 'markAsRead');
+        Route::get('/chat/get/{conversation_id}', 'getConversation');
+        Route::get('chat/list/data', 'getchatlist');
+        Route::get('/chat/delete/{chat_id}', 'chatdelete');
+        Route::get('/chat/image/delete/{image_id}', 'chatImageDelete');
+    });
 
-Route::post('customer/booking/as-soon-as-possible', [AsSoonAsPossibleBookingController::class, 'asSoonAsPossibleBooking']);
 
-Route::controller(BookingActionController::class)->group(function () {
-    Route::post('barber/booking/accept/{id}', 'acceptAsapBooking');
-    Route::post('barber/booking/reject/{id}', 'rejectAsapBooking');
-});
 
 
- Route::controller(CustomerReviewRatingController::class)->group(function () {
-    Route::post('customer/review/rating', 'customerReviewRating');
-    Route::get('customer/review/rating', 'customerReviewRatingList');
-    Route::get('customer/review/rating/{id}', 'customerReviewRatingDetails');
-    Route::post('customer/review/rating/{id}', 'customerReviewRatingUpdate');
-
- });
-
- Route::controller(SalonInvoiceController::class)->group(function () {
-    Route::get('salon/invoices', 'index');
-    Route::get('salon/invoices/{id}', 'details');
-    Route::get('salon/invoices/download/{id}', 'download');
-
-    // New Periodic (Bi-monthly) Routes
-    Route::get('salon/period-invoices', 'periodIndex');
-    Route::get('salon/period-invoices/details/{id}', 'periodDetails');
-    Route::get('salon/period-invoices/download/{id}', 'periodDownload');
- });
-
-//////////////////////Admin Panel/////////////////////
-Route::controller(AdminPaymentController::class)->group(function () {
-    Route::get('/admin/payments', 'index');
-    Route::get('/admin/payments/{id}', 'show');
-    Route::post('/admin/payments/{id}/status', 'updatePaymentStatus');
-    Route::get('/admin/commission/settings', 'getCommissionSettings');
-    Route::post('/admin/commission/settings', 'setCommissionSetting');
-});
 
 
 });

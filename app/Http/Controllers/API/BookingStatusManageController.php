@@ -67,73 +67,58 @@ public function completedBooking(Request $request)
         $userId = $request->user_id;
         $bookingIds = $request->booking_ids;
 
-        // ✅ Fetch only user's bookings
         $bookings = Booking::whereIn('id', $bookingIds)
             ->where('customer_id', $userId)
             ->get();
 
-        // ✅ Ownership check
         if ($bookings->count() !== count($bookingIds)) {
-            return $this->success([], 'Some bookings do not belong to this user');
+            return $this->error([], 'Some bookings do not belong to this user');
         }
-
-        $loyaltySetting = LoyaltySetting::first();
-        $points = $loyaltySetting->per_booking_loyality ?? 0;
 
         foreach ($bookings as $booking) {
 
-            // ✅ Update booking status
+            // ✅ status update
             $booking->update([
                 'status' => 'completed',
                 'payment_status' => 'paid',
             ]);
 
-            // =====================================
-            // 🔥 SALON PRIORITY LOGIC
-            // =====================================
+            // ❌ loyalty booking হলে skip
+            if ($booking->booking_type === 'loyalty') {
+                continue;
+            }
 
-            // ✅ CASE 1: SALON BOOKING
+            // =========================
+            // 🔥 Determine points উৎস
+            // =========================
             if (!empty($booking->salon_id)) {
-
-                // 🔥 get last total
-                $lastTotal = LoyalityAdd::where('customer_id', $booking->customer_id)
-                    ->where('salon_id', $booking->salon_id)
-                    ->latest('id')
-                    ->value('remaining_loyality_point') ?? 0;
-
-                // ✅ always create new row
-                $loyalty = new LoyalityAdd();
-                $loyalty->customer_id = $booking->customer_id;
-                $loyalty->salon_id = $booking->salon_id;
-                $loyalty->barber_id = null;
-                $loyalty->booking_id = $booking->id;
-                $loyalty->per_booking_loyality_point = $points;
-                $loyalty->remaining_loyality_point = $lastTotal + $points;
-                $loyalty->save();
+                // 👉 SALON
+                $setting = SalonLoyality::where('salon_id', $booking->salon_id)->first();
+                $points = $setting->per_booking_loyality ?? 0;
+            } else {
+                // 👉 HOME BARBER
+                $setting = LoyaltySetting::first();
+                $points = $setting->per_booking_loyality ?? 0;
             }
 
-            // =====================================
-            // 🔥 HOME BARBER LOGIC
-            // =====================================
-            elseif (!empty($booking->barber_id)) {
+            // =========================
+            // 🔥 Get current total balance
+            // =========================
+            $lastTotal = LoyalityAdd::where('customer_id', $booking->customer_id)
+                ->latest('id')
+                ->value('remaining_loyality_point') ?? 0;
 
-                // 🔥 get last total
-                $lastTotal = LoyalityAdd::where('customer_id', $booking->customer_id)
-                    ->where('barber_id', $booking->barber_id)
-                    ->whereNull('salon_id')
-                    ->latest('id')
-                    ->value('remaining_loyality_point') ?? 0;
-
-                // ✅ always create new row
-                $loyalty = new LoyalityAdd();
-                $loyalty->customer_id = $booking->customer_id;
-                $loyalty->salon_id = null;
-                $loyalty->barber_id = $booking->barber_id;
-                $loyalty->booking_id = $booking->id;
-                $loyalty->per_booking_loyality_point = $points;
-                $loyalty->remaining_loyality_point = $lastTotal + $points;
-                $loyalty->save();
-            }
+            // =========================
+            // 🔥 Add loyalty
+            // =========================
+            LoyalityAdd::create([
+                'customer_id' => $booking->customer_id,
+                'salon_id' => !empty($booking->salon_id) ? $booking->salon_id : null,
+                'barber_id' => empty($booking->salon_id) ? $booking->barber_id : null,
+                'booking_id' => $booking->id,
+                'per_booking_loyality_point' => $points,
+                'remaining_loyality_point' => $lastTotal + $points,
+            ]);
         }
 
         return $this->success($bookings, 'Bookings marked as completed successfully');

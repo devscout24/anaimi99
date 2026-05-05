@@ -35,11 +35,39 @@
                         @csrf
                         @method('PUT')
 
+
+
+                       <div class="mb-3">
+                            <label for="per_booking_loyality" class="form-label">Services(For Barber Loyality)</label>
+                            <div class="input-group">
+                               <select name="service_id" id="service_id" class="form-control">
+                                    <option value="">Select a Service</option>
+                                    @foreach($services as $service)
+                                        <option value="{{ $service->id }}" {{  $setting->service_id == $service->id ? 'selected' : '' }}>
+                                            {{ $service->service_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @error('service_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+
+
+
+
+
+
+
+
+
                         <div class="mb-3">
                             <label for="per_booking_loyality" class="form-label">Loyalty Points (per booking)</label>
                             <div class="input-group">
-                                <input type="number" step="0.01" name="per_booking_loyality" id="per_booking_loyality" 
-                                    class="form-control @error('per_booking_loyality') is-invalid @enderror" 
+                                <input type="number" step="0.01" name="per_booking_loyality" id="per_booking_loyality"
+                                    class="form-control @error('per_booking_loyality') is-invalid @enderror"
                                     value="{{ old('per_booking_loyality', $setting->per_booking_loyality ?? 0) }}" required>
                                 <span class="input-group-text">Points</span>
                             </div>
@@ -47,6 +75,20 @@
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
+
+                         <div class="mb-3">
+                            <label for="service_reach_loyality" class="form-label">Service Reach Loyalty</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" name="service_reach_loyality" id="service_reach_loyality"
+                                    class="form-control @error('service_reach_loyality') is-invalid @enderror"
+                                    value="{{ old('service_reach_loyality', $setting->service_reach_loyality ?? 0) }}" required>
+                                <span class="input-group-text">Points</span>
+                            </div>
+                            @error('service_reach_loyality')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
 
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">Update Setting</button>

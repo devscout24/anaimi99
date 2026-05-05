@@ -19,6 +19,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('reset/password', 'resetPassword');
     Route::post('/resend/otp', 'resendOtp');
 
+
+
 });
 
 
@@ -28,6 +30,13 @@ Route::middleware('auth:api')->group(function () {
 Route::controller(AuthController::class)->group(function () {
     Route::post('/user/profile/set', 'userProfileSet');
     Route::post('/profile/image/update','ProfileImageUpdate');
+
+     Route::post('/change/password', 'changePassword');
+
+     Route::post('/delete/account', 'deleteAccount');
+     Route::post('/fcm/token', 'fcmToken');
+     Route::post('/user/profile/get', 'userProfileGet');
+     Route::post('/user/profile/update', 'userProfileUpdate');
 
 });
 

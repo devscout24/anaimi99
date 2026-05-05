@@ -71,6 +71,50 @@
                  <!--  Menu -->
                  <li class="menu-title"><span data-key="t-menu">Menu</span></li>
 
+                 <!-- Manage Clients -->
+                 <li class="nav-item">
+                     <a class="nav-link menu-link {{ request()->routeIs('admin.manage.*') ? '' : 'collapsed' }}" href="#sidebarManageClients" data-bs-toggle="collapse" role="button"
+                         aria-expanded="{{ request()->routeIs('admin.manage.*') ? 'true' : 'false' }}" aria-controls="sidebarManageClients">
+                         <i class="ri-user-settings-line"></i> <span data-key="t-manage-clients">Manage Clients</span>
+                     </a>
+                     <div class="collapse menu-dropdown {{ request()->routeIs('admin.manage.*') ? 'show' : '' }}" id="sidebarManageClients">
+                         <ul class="nav nav-sm flex-column">
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.manage.salons') }}" class="nav-link {{ request()->routeIs('admin.manage.salons') ? 'active' : '' }}">
+                                     Manage Salons
+                                 </a>
+                             </li>
+                             <li class="nav-item">
+                                 <a href="{{ route('admin.manage.barbers') }}" class="nav-link {{ request()->routeIs('admin.manage.barbers') ? 'active' : '' }}">
+                                     Manage Barbers
+                                 </a>
+                             </li>
+                         </ul>
+                     </div>
+                 </li>
+
+                 <!-- Reports & Financials -->
+                 <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? '' : 'collapsed' }}" href="#sidebarReports" data-bs-toggle="collapse" role="button"
+                        aria-expanded="{{ request()->routeIs('admin.reports.*') ? 'true' : 'false' }}" aria-controls="sidebarReports">
+                        <i class="ri-file-chart-line"></i> <span data-key="t-reports">Reports & Finance</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ request()->routeIs('admin.reports.*') ? 'show' : '' }}" id="sidebarReports">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.transactions') }}" class="nav-link {{ request()->routeIs('admin.reports.transactions') ? 'active' : '' }}">
+                                    All Transactions
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reports.providers') }}" class="nav-link {{ request()->routeIs('admin.reports.providers') ? 'active' : '' }}">
+                                    Provider Reports
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
                  <!-- Dashboard -->
                  <li class="nav-item">
                      <a class="nav-link menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">

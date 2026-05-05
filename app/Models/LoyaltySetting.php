@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class LoyaltySetting extends Model
 {
-    protected $fillable = ['per_booking_loyality'];
+    protected $fillable = ['service_id', 'per_booking_loyality'];
 }

@@ -84,24 +84,21 @@ class AuthController extends Controller
 
 
 
-           if($request->galary_image){
-            
-            $images = [];
-            foreach ($request->galary_image as $key => $image) {
-                $file = $image;
-                $extension = $file->Extension();
-                $file_name = time() . '_' . $key . '.' . $extension;
-                $path = 'uploads/galary_image/';
-                $file->move($path, $file_name);
-                 $galary_image=new ImageGallary();
-                 $galary_image->provider_profile_id=$user->id;
-                 $galary_image->image=$path . $file_name;
-                 $galary_image->save();   
-            }
-            
+            if ($request->galary_image) {
 
-           
-           }
+                $images = [];
+                foreach ($request->galary_image as $key => $image) {
+                    $file = $image;
+                    $extension = $file->Extension();
+                    $file_name = time() . '_' . $key . '.' . $extension;
+                    $path = 'uploads/galary_image/';
+                    $file->move($path, $file_name);
+                    $galary_image = new ImageGallary();
+                    $galary_image->provider_profile_id = $user->id;
+                    $galary_image->image = $path . $file_name;
+                    $galary_image->save();
+                }
+            }
 
             // providerprofile শুধু salon/home_barbar/salon_barbar এর জন্য
             $validProviderRoles = ['salon', 'home_barbar', 'salon_barbar'];
@@ -110,8 +107,8 @@ class AuthController extends Controller
 
             // valid user_type না হলে role থেকে নেব, তাও invalid হলে skip করব
             $resolvedUserType = in_array($requestedUserType, $validProviderRoles)
-                                    ? $requestedUserType
-                                    : (in_array($requestedRole, $validProviderRoles) ? $requestedRole : null);
+                ? $requestedUserType
+                : (in_array($requestedRole, $validProviderRoles) ? $requestedRole : null);
 
             if ($resolvedUserType && ($request->experience || in_array($requestedRole, $validProviderRoles))) {
                 $user->providerprofiles()->create([
@@ -295,7 +292,19 @@ class AuthController extends Controller
         try {
             if (Auth::guard('api')->attempt(['email' => $request->email, 'password' => $request->password])) {
                 $user = Auth::guard('api')->user();
-                //   $user->last_login_role=$request->role ?? 'user';
+
+                // Check Approval Status
+                $restrictedRoles = ['salon', 'home_barbar', 'salon_barbar'];
+                if (in_array($user->role, $restrictedRoles) && $user->status !== 'approved') {
+                    $status = $user->status;
+                    Auth::guard('api')->logout();
+                    $message = 'Your account is currently ' . ($status ?? 'pending') . '. Please contact admin for approval.';
+                    if ($status == 'cancel' || $status == 'blocked') {
+                        $message = 'Your account has been blocked. Please contact support.';
+                    }
+                    return $this->error([], $message, 403);
+                }
+
                 $user->save();
                 $user->makeHidden(['password', 'created_at', 'updated_at']);
                 $token = JWTAuth::fromUser($user);

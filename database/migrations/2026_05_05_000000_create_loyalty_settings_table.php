@@ -4,27 +4,32 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
+        if (Schema::hasTable('loyalty_settings')) {
+            return;
+        }
+
         Schema::create('loyalty_settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('service_id')->nullable();
-            $table->foreign('service_id')->references('id')->on('services')->onDelete('set null');
-            $table->decimal('per_booking_loyality', 10, 2)->default(0);
-            $table->decimal('service_reach_loyality', 10, 2)->default(0);
+            $table->foreignId('service_id')->constrained()->onDelete('cascade');
+            $table->decimal('per_booking_loyality', 8, 2)->default(0);
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('loyalty_settings');
     }

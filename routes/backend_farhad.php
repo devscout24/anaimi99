@@ -11,8 +11,26 @@ use App\Http\Controllers\Backend\Setting\StripeSettingController;
 use App\Http\Controllers\Backend\Setting\SystemSettingController;
 use App\Http\Controllers\Backend\Setting\ProfileSettingController;
 use App\Http\Controllers\Backend\Setting\CommissionSettingController;
+use App\Http\Controllers\Backend\Admin\ClientManagementController;
+use App\Http\Controllers\Backend\Admin\ReportController;
+use App\Http\Controllers\Backend\Admin\ReportDownloadController;
 
 Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Reports & Transactions
+    Route::controller(ReportController::class)->prefix('reports')->name('reports.')->group(function () {
+        Route::get('transactions', 'transactions')->name('transactions');
+        Route::get('provider-reports', 'providerReports')->name('providers');
+        Route::get('download-pdf/{id}', [ReportDownloadController::class, 'downloadProviderPdf'])->name('download-pdf');
+    });
+
+    // Management Routes
+    Route::prefix('manage-clients')->name('manage.')->group(function () {
+        Route::get('salons', [ClientManagementController::class, 'manageSalons'])->name('salons');
+        Route::get('barbers', [ClientManagementController::class, 'manageBarbers'])->name('barbers');
+        Route::get('details/{id}', [ClientManagementController::class, 'getDetails'])->name('details');
+        Route::post('update-status', [ClientManagementController::class, 'updateStatus'])->name('update-status');
+    });
 
     // Dashboard route
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

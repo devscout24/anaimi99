@@ -36,8 +36,11 @@ use ApiResponse;
                 ['service_id' => $request->service_id,
 
                  'salon_id' => $user->id,
+
                 ],
-                ['loyalty_points' => $request->loyality_points],
+                ['loyalty_points' => $request->loyality_points,
+                'service_reach_loyality' => $request->service_reach_loyality ?? 0,
+                ],
 
             );
 

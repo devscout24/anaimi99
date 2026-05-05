@@ -26,8 +26,8 @@ return new class extends Migration
 
 
 
-            $table->enum('booking_type',['salon_auto','salon_barber','home_barber','as_soon_possible','online','custom','cod'])->default('salon_auto');
-            $table->enum('payment_type',['online','onsite','cod'])->default('online');
+            $table->enum('booking_type',['salon_auto','salon_barber','home_barber','as_soon_possible','online','custom','cod','loyalty'])->default('salon_auto');
+            $table->enum('payment_type',['online','onsite','cod','loyalty'])->default('online');
 
 
             $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
@@ -37,9 +37,10 @@ return new class extends Migration
                                 'accepted',
                                 'confirmed',
                                 'on_the_way',
+
                                 'arrived',
                                 'completed',
-                                'cancelled'         
+                                'cancelled'
                             ])->default('pending');
 
 

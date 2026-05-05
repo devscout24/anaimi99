@@ -16,6 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('salon_id');
             $table->unsignedBigInteger('service_id');
             $table->integer('loyalty_points');
+            $table->decimal('service_reach_loyality', 10, 2);
+            $table->foreign('salon_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
             $table->timestamps();
         });
     }
