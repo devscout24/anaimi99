@@ -1,9 +1,16 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\Backend\Admin\ClientManagementController;
 use App\Http\Controllers\Backend\Admin\ReportController;
 use App\Http\Controllers\Backend\Admin\ReportDownloadController;
 use App\Http\Controllers\Backend\AdminChatController;
+=======
+use App\Http\Controllers\Backend\abdullah\DynamicController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Backend\Farhad\StatusController;
+use App\Http\Controllers\Backend\Farhad\ProductController;
+>>>>>>> c6f6b316aa61bac3c706a3e5b7b3f0b6f02dc63c
 use App\Http\Controllers\Backend\Farhad\CategoryController;
 use App\Http\Controllers\Backend\Farhad\DashboardController;
 use App\Http\Controllers\Backend\Farhad\ProductController;
