@@ -67,12 +67,12 @@ public function completedBooking(Request $request)
         $userId = $request->user_id;
         $bookingIds = $request->booking_ids;
 
-        // 🔥 fetch only user bookings
+        // ✅ Fetch only user's bookings
         $bookings = Booking::whereIn('id', $bookingIds)
             ->where('customer_id', $userId)
             ->get();
 
-        // 🔥 ownership check
+        // ✅ Ownership check
         if ($bookings->count() !== count($bookingIds)) {
             return $this->success([], 'Some bookings do not belong to this user');
         }
@@ -82,47 +82,66 @@ public function completedBooking(Request $request)
 
         foreach ($bookings as $booking) {
 
-
-            // if (in_array($booking->status, ['cancelled', 'completed'])) {
-            //     continue;
-            // }
-
-
+            // ✅ Update booking status
             $booking->update([
                 'status' => 'completed',
                 'payment_status' => 'paid',
             ]);
 
+            // =====================================
+            // 🔥 SALON PRIORITY LOGIC
+            // =====================================
 
-            $loyalty = LoyalityAdd::where('customer_id', $booking->customer_id)->first();
+            // ✅ CASE 1: SALON BOOKING
+            if (!empty($booking->salon_id)) {
 
-            if ($loyalty) {
-                $loyalty->remaining_loyality_point =
-                    ($loyalty->remaining_loyality_point ?? 0) + $points;
+                // 🔥 get last total
+                $lastTotal = LoyalityAdd::where('customer_id', $booking->customer_id)
+                    ->where('salon_id', $booking->salon_id)
+                    ->latest('id')
+                    ->value('remaining_loyality_point') ?? 0;
 
-                $loyalty->per_booking_loyality_point = $points;
-
-                $loyalty->save();
-            } else {
+                // ✅ always create new row
                 $loyalty = new LoyalityAdd();
                 $loyalty->customer_id = $booking->customer_id;
                 $loyalty->salon_id = $booking->salon_id;
+                $loyalty->barber_id = null;
+                $loyalty->booking_id = $booking->id;
+                $loyalty->per_booking_loyality_point = $points;
+                $loyalty->remaining_loyality_point = $lastTotal + $points;
+                $loyalty->save();
+            }
+
+            // =====================================
+            // 🔥 HOME BARBER LOGIC
+            // =====================================
+            elseif (!empty($booking->barber_id)) {
+
+                // 🔥 get last total
+                $lastTotal = LoyalityAdd::where('customer_id', $booking->customer_id)
+                    ->where('barber_id', $booking->barber_id)
+                    ->whereNull('salon_id')
+                    ->latest('id')
+                    ->value('remaining_loyality_point') ?? 0;
+
+                // ✅ always create new row
+                $loyalty = new LoyalityAdd();
+                $loyalty->customer_id = $booking->customer_id;
+                $loyalty->salon_id = null;
                 $loyalty->barber_id = $booking->barber_id;
                 $loyalty->booking_id = $booking->id;
                 $loyalty->per_booking_loyality_point = $points;
-                $loyalty->remaining_loyality_point = $points;
+                $loyalty->remaining_loyality_point = $lastTotal + $points;
                 $loyalty->save();
             }
         }
 
-
         return $this->success($bookings, 'Bookings marked as completed successfully');
 
     } catch (\Exception $e) {
-        return $this->error('something went wrong', $e->getMessage());
+        return $this->error('Something went wrong', $e->getMessage());
     }
 }
-
     public function DetailsBooking($id)
     {
         try {
@@ -165,11 +184,22 @@ public function completedBooking(Request $request)
             // 3. Loyalty points added for this booking
             $pointsAdded = LoyaltySetting::query()->first();
 
+           $barbarDetails=[
+                      'barbar_name'=>$booking->barber->name ?? 'N/A',
+                      'babrbar_profile'=>asset($booking->barber->profile_image) ?? 'N/A',
+                      'phone'=>$booking->barber->phone ??'NA',
+           ];
+
+
+
+
             $data = [
                 'id' => $booking->id,
                 'title' => 'Service confirmed',
                 'subtitle' => 'The service was successfully completed.',
                 'loyalty_message' =>  $pointsAdded->per_booking_loyality,
+                'barbarDetails'=>$barbarDetails,
+
                 'service_info' => $serviceText,
                 'date_time_info' => $formattedDateTime,
                 'booking_status' => $booking->status,

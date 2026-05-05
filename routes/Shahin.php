@@ -12,19 +12,23 @@ use App\Http\Controllers\Api\CustomerBookingController;
 use App\Http\Controllers\Api\CustomerReservationController;
 use App\Http\Controllers\Api\CustomerReviewRatingController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\Loyality;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\ReviewController;
 
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SalonBarberAddController;
 use App\Http\Controllers\Api\SalonBarberBookingScheduleList;
 use App\Http\Controllers\Api\SalonCustomBookingController;
 use App\Http\Controllers\Api\SalonInvoiceController;
+use App\Http\Controllers\Api\SalonLoyalityController;
 use App\Http\Controllers\Api\SalonOrBarberController;
 use App\Http\Controllers\Api\SalonPriceSetcontroller;
 use App\Http\Controllers\Api\SalonProfileController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
+
+
 
 
 
@@ -125,6 +129,14 @@ Route::controller(InvoiceController::class)->group(function () {
  });
 
 
+
+ Route::controller(SalonLoyalityController::class)->group(function () {
+    Route::post('/salon/loyalty/point/add/update', 'addLoyaltyPoints');
+    Route::get('/salon/loyalty/point/get', 'getLoyaltyPoints');
+
+ });
+
+
  ////////salon barber wise booking schedule list///////////////
 Route::controller(SalonBarberBookingScheduleList::class)->group(function(){
 
@@ -152,9 +164,23 @@ Route::controller(CustomerReservationController::class)->group(function(){
     Route::get('customer/reservation', 'customerReservation');
     Route::get('customer/reservation/details/{id}', 'customerReservationDetails');
     Route::get('customer/booking/details/{id}','customerbookingDetails');
+
+    Route::post('customer/reservation/cancel/{id}', 'customerCancelReservation');
+
+
+
 });
 
 
+Route::controller(Loyality::class)->group(function(){
+
+    Route::get('loyalty/point/get/history', 'getLoyalityHistory');
+
+    Route::get('loyalty/point/get', 'getLoyaltyPoint');
+
+      Route::get('/salon/wise/loyalty/point/get/{salonId}', 'getSalonWiseLoyaltyPoints');
+
+});
 
 
 
