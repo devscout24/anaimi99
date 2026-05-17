@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('status', ['active', 'inactive', 'pending'])->default('pending')->after('email');
-            $table->boolean('is_approved')->default(false)->after('status');
+            if (!Schema::hasColumn('users', 'status')) {
+                $table->enum('status', ['active', 'inactive', 'pending'])->default('pending')->after('email');
+            }
+            if (!Schema::hasColumn('users', 'is_approved')) {
+                $table->boolean('is_approved')->default(false)->after('status');
+            }
         });
     }
 

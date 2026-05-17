@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Events\ChatEvent;
 use App\Http\Controllers\Controller;
@@ -263,3 +263,4 @@ class ChatController extends Controller
         }
     }
 }
+

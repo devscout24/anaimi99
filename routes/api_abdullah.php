@@ -22,3 +22,4 @@ Route::middleware(['auth:api'])->prefix('admin')->name('admin.')->group(function
 
 Route::get('/help/index', [HelpController::class, 'index']);
 Route::post('/help/store', [HelpController::class, 'store']);
+

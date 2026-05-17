@@ -1,38 +1,37 @@
 <?php
 
-use App\Http\Controllers\Api\AdminPaymentController;
-use App\Http\Controllers\Api\AsSoonAsPossibleBookingController;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\BankstatementController;
-use App\Http\Controllers\Api\BarberBookingController;
-use App\Http\Controllers\Api\BarberschedulebookingController;
+use App\Http\Controllers\API\AdminPaymentController;
+use App\Http\Controllers\API\AsSoonAsPossibleBookingController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\BankstatementController;
+use App\Http\Controllers\API\BarberBookingController;
+use App\Http\Controllers\API\BarberschedulebookingController;
 use App\Http\Controllers\API\BookingActionController;
-use App\Http\Controllers\Api\BookingStatusManageController;
-use App\Http\Controllers\Api\CustomerBookingController;
-use App\Http\Controllers\Api\CustomerReservationController;
-use App\Http\Controllers\Api\CustomerReviewRatingController;
-use App\Http\Controllers\Api\HelpandSupportController;
-use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\Api\Loyality;
+use App\Http\Controllers\API\BookingStatusManageController;
+use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\API\CustomerBookingController;
+use App\Http\Controllers\API\CustomerReservationController;
+use App\Http\Controllers\API\CustomerReviewRatingController;
+use App\Http\Controllers\API\HelpandSupportController;
+use App\Http\Controllers\API\InvoiceController;
 
-use App\Http\Controllers\Api\LoyalityBookingController;
-use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\SalonBarberAddController;
-use App\Http\Controllers\Api\SalonBarberBookingScheduleList;
-use App\Http\Controllers\Api\SalonCustomBookingController;
-use App\Http\Controllers\Api\SalonInvoiceController;
-use App\Http\Controllers\Api\SalonLoyalityController;
-use App\Http\Controllers\Api\SalonOrBarberController;
-use App\Http\Controllers\Api\SalonPriceSetcontroller;
-use App\Http\Controllers\Api\SalonProfileController;
-use App\Http\Controllers\Api\ScheduleController;
-use App\Http\Controllers\Api\StripeWebhookController;
+use App\Http\Controllers\API\Loyality;
+use App\Http\Controllers\API\LoyalityBookingController;
+use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\ReviewController;
+use App\Http\Controllers\API\SalonBarberAddController;
+use App\Http\Controllers\API\SalonBarberBookingScheduleList;
+use App\Http\Controllers\API\SalonCustomBookingController;
+use App\Http\Controllers\API\SalonInvoiceController;
+use App\Http\Controllers\API\SalonLoyalityController;
+use App\Http\Controllers\API\SalonOrBarberController;
+use App\Http\Controllers\API\SalonPriceSetcontroller;
+use App\Http\Controllers\API\SalonProfileController;
+use App\Http\Controllers\Api\SalonServiceController;
+use App\Http\Controllers\API\ScheduleController;
+
+use App\Http\Controllers\API\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\Api\ChatController;
-
-
 
 
 
@@ -130,6 +129,20 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/salon/price/update/{id}', 'updateSalonPrice');
     });
 
+
+   Route::controller(SalonServiceController::class)->group(function () {
+        Route::post('/salon/service/add', 'addSalonService');
+        Route::get('/salon/service/list', 'salonServiceList');
+        Route::post('/salon/service/delete/{id}', 'deleteSalonService');
+
+    });
+
+
+
+
+
+
+
     Route::controller(SalonCustomBookingController::class)->group(function () {
         Route::post('/salon/custom/booking', 'salonCustomBooking');
     });
@@ -150,7 +163,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('salon/barbar/booking/details/{id}', 'salonBarbarBookingDetails');
     });
 
-    Route::get('salon/report', [\App\Http\Controllers\Api\ReportController::class, 'index']);
+    Route::get('salon/report', [\App\Http\Controllers\API\ReportController::class, 'index']);
 
     Route::controller(SalonProfileController::class)->group(function () {
         Route::get('salon/profile/{type}', 'getProfile');
@@ -189,6 +202,12 @@ Route::middleware('auth:api')->group(function () {
 
     Route::controller(HelpandSupportController::class)->group(function () {
       Route::post('help/support', 'submitHelpSupport');
+    });
+
+
+  Route::controller(SalonServiceController::class)->group(function () {
+        Route::get('customer/salon/service/list/{salon_id}', 'customerSalonServiceList');
+        Route::get('customer/barber/service/list', 'customerBarberServiceList');
     });
 
 

@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->string('service_name')->unique();
+            $table->unsignedBigInteger('salon_id')->nullable();
+            $table->foreign('salon_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

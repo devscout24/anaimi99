@@ -101,3 +101,4 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
         Route::get('/chat/admin/image/delete/{image_id}', 'chatImageDelete')->name('chat.image.delete');
     });
 });
+

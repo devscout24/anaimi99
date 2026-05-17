@@ -84,3 +84,4 @@ class BookingActionController extends Controller
         }
     }
 }
+

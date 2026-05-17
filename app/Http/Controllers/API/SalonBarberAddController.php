@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TempPasswordMail;
@@ -18,62 +18,190 @@ class SalonBarberAddController extends Controller
 {
 
  use ApiResponse;
-    public function addSalonBarber(Request $request)
-    {
+ public function addSalonBarber(Request $request)
+{
+    $validator = Validator::make($request->all(), [
 
-       $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|string|max:20',
-        ]);
+        'salon_barber_id' => 'nullable|exists:users,id',
 
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors()->first());
+        'name' => 'sometimes|string|max:255',
+        'email' => 'nullable|email',
+        'phone' => 'sometimes|string|max:20',
+        'availability' => 'nullable',
+
+        'profile_image' => 'nullable|image',
+
+    ]);
+
+    if ($validator->fails()) {
+
+        return $this->validationError($validator->errors()->first());
+    }
+
+    try {
+
+        $user = Auth::guard('api')->user();
+        $salonId = Auth::guard('api')->id();
+
+        if (!$user || !$salonId) {
+
+            return $this->validationError('Unauthorized. Please login as salon first.');
         }
 
+        if ($user->role !== 'salon') {
 
-
-
-       try{
-
-      $user = Auth::guard('api')->user();
-      $salonId = Auth::guard('api')->id();
-
-      if (!$user || !$salonId) {
-          return $this->validationError('Unauthorized. Please login as salon first.');
-      }
-
-       if(!$user || $user->role !== 'salon') {
             return $this->validationError('Unauthorized. Only salon users can add barbers.');
         }
 
-        $password = Str::password(12);
-        $barber = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-          'salon_id'=> $salonId,
-            'password' => bcrypt($password),
-            'role' => 'salon_barbar',
-        ]);
+        $barber = null;
 
-        return $this->success('Barber added to salon successfully', ['barber_id' => $barber->id]);
-       }
-       catch(\Exception $e){
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE MODE
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('salon_barber_id')) {
+
+            $barber = User::where('id', $request->salon_barber_id)
+                ->where('salon_id', $salonId)
+                ->where('role', 'salon_barbar')
+                ->first();
+
+            if (!$barber) {
+
+                return $this->validationError('Barber not found.');
+            }
+
+            // Email unique check
+            if ($request->filled('email')) {
+
+                $emailExists = User::where('email', $request->email)
+                    ->where('id', '!=', $barber->id)
+                    ->exists();
+
+                if ($emailExists) {
+
+                    return $this->validationError('Email already exists.');
+                }
+
+                $barber->email = $request->email;
+            }
+
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE MODE
+            |--------------------------------------------------------------------------
+            */
+
+            if (!$request->filled('name')) {
+
+                return $this->validationError('Name is required.');
+            }
+
+            if (!$request->filled('phone')) {
+
+                return $this->validationError('Phone is required.');
+            }
+
+            if ($request->filled('email')) {
+
+                $emailExists = User::where('email', $request->email)->exists();
+
+                if ($emailExists) {
+
+                    return $this->validationError('Email already exists.');
+                }
+            }
+
+            $barber = new User();
+
+            $barber->password = bcrypt(Str::password(12));
+            $barber->role = 'salon_barbar';
+            $barber->salon_id = $salonId;
+
+            if ($request->filled('email')) {
+
+                $barber->email = $request->email;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Upload Image
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('profile_image')) {
+
+            $image = $request->file('profile_image');
+
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+            $path = 'uploads/profile_photo/';
+
+            $image->move(public_path($path), $imageName);
+
+            $barber->profile_image = $path . $imageName;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Only Sent Data
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('name')) {
+
+            $barber->name = $request->name;
+        }
+
+        if ($request->filled('phone')) {
+
+            $barber->phone = $request->phone;
+        }
+
+        if ($request->has('availability')) {
+
+            $barber->availability = $request->availability;
+        }
+
+        $barber->save();
+
+        return $this->success(
+
+            [
+                'barber_id' => $barber->id
+            ],
+
+            $request->filled('salon_barber_id')
+                ? 'Barber updated successfully'
+                : 'Barber added successfully'
+        );
+
+    } catch (\Exception $e) {
+
         return $this->error($e->getMessage());
-       }
-       catch(\Exception $e){
-        return $this->error($e->getMessage());
-       }
     }
-
+}
     public function SalonBarberlist()
     {
         try{
             if  (!Auth::check() || Auth::user()->role !== 'salon') {
                 return $this->validationError('Unauthorized. Only salon users can access this resource.');
             }
-            $barbers = User::where('salon_id', Auth::id())->where('role', 'salon_barbar')->get();
+            $barbers = User::where('salon_id', Auth::id())->where('role', 'salon_barbar')->get()->map(function ($barber) {
+                return [
+                    'id' => $barber->id,
+                    'name' => $barber->name,
+                    'email' => $barber->email,
+                    'phone' => $barber->phone,
+                    'profile_image' => $barber->profile_image ? asset($barber->profile_image) : null,
+                    'availability'=>$barber->availability,
+                ];
+            })->values();
 
             return $this->success($barbers, 'Barber list retrieved successfully');
         }

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,7 @@ class ProfileController extends Controller
                 try {
 
                     $user = Auth::guard('api')->user()
-                        ->load(['providerprofiles', 'imageGallery']);
+                        ->load(['provider_profiles', 'imageGallery']);
 
                     $data = [
                         'user' => [
@@ -23,11 +24,12 @@ class ProfileController extends Controller
                             'email' => $user->email,
                             'phone'=>$user->phone,
                             'role'=>$user->role,
+                            'postal_code'=>$user->provider_profiles->postal_code?? null,
                             'profile_image' => $user->profile_image
                                 ? asset($user->profile_image)
                                 : null,
 
-                            'profile' => $user->providerprofiles?? null,
+                            'profile' => $user->provider_profiles?? null,
 
                             'gallery_images' => collect($user->imageGallery ?? [])
                                 ->map(function ($image) {
@@ -56,7 +58,7 @@ class ProfileController extends Controller
         $user->save();
 
         if($user->role=='home_barbar' || $user->role=='salon_barbar' || $user->role=='salon'){
-            $profile = $user->providerprofiles;
+            $profile = $user->provider_profiles;
             if($profile){
                 $profile->business_name = request('business_name', $profile->business_name)?? $profile->business_name;
                 $profile->representative_name = request('representative_name', $profile->representative_name)?? $profile->representative_name;
@@ -145,12 +147,13 @@ class ProfileController extends Controller
     }
  }
 
-public function availableControll()
+public function availableControll(Request $request)
 {
     try {
 
         $user = Auth::guard('api')->user();
-        $profile = $user->providerprofiles;
+        $salon_barber=User::where('id',$request->salon_barber_id)->whereIn('role',['salon_barber'])->first();
+        $profile = $user->provider_profiles;
 
 
         if (!$profile) {
@@ -181,11 +184,26 @@ public function availableControll()
         }
 
         // 🔥 update both (user + profile)
-        $user->availability = $available;
+         if($salon_barber){
+            $salon_barber->availability = $available;
+            $salon_barber->save();
+
+            $salon_barber_profile = $salon_barber->provider_profiles;
+            if ($salon_barber_profile) {
+                $salon_barber_profile->available = $available;
+                $salon_barber_profile->save();
+            }
+        }
+        else{
+
+
+          $user->availability = $available;
         $user->save();
 
         $profile->available = $available;
         $profile->save();
+        }
+
 
         return $this->success([
             'availability' => $available
@@ -202,7 +220,7 @@ public function updateLocation()
 {
     try {
         $user = Auth::guard('api')->user();
-        $profile = $user->providerprofiles;
+        $profile = $user->provider_profiles;
 
         if (!$profile) {
             return response()->json(['error' => 'Profile not found.'], 404);
@@ -233,16 +251,16 @@ public function userBusinessDetailsGet()
 {
     try {
         $user = Auth::guard('api')->user()
-            ->load(['providerprofiles']);
+            ->load(['provider_profiles']);
 
-        if (!$user->providerprofiles) {
+        if (!$user->provider_profiles) {
             return response()->json(['error' => 'Profile not found.'], 404);
         }
 
         $data = [
-            'business_name' => $user->providerprofiles->business_name,
-            'strret_number' => $user->providerprofiles->street_number,
-            'vat_number' => $user->providerprofiles->vat_number,
+            'business_name' => $user->provider_profiles->business_name,
+            'strret_number' => $user->provider_profiles->street_number,
+            'vat_number' => $user->provider_profiles->vat_number,
         ];
 
         return $this->success($data);
@@ -257,7 +275,7 @@ public function userBusinessDetailsUpdate()
 {
     try {
         $user = Auth::guard('api')->user();
-        $profile = $user->providerprofiles;
+        $profile = $user->provider_profiles;
 
         if (!$profile) {
             return response()->json(['error' => 'Profile not found.'], 404);

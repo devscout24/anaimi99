@@ -23,13 +23,13 @@ class ClientManagementController extends Controller
                     $btn = '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-info btn-sm viewDetails"><i class="ri-eye-line"></i></a> ';
 
                     if ($row->status == 'pending') {
-                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser">Approve</a> ';
-                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm cancelUser">Cancel</a>';
+                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser" title="Approve"><i class="fa-solid fa-check"></i></a> ';
+                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm cancelUser" title="Cancel"><i class="fa-solid fa-xmark"></i></a>';
                     } else {
                         if ($row->status == 'approved') {
-                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-warning btn-sm cancelUser">Block</a>';
+                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-warning btn-sm cancelUser" title="Block"><i class="fa-solid fa-ban"></i></a>';
                         } else {
-                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser">Unblock/Approve</a>';
+                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser" title="Unblock/Approve"><i class="fa-solid fa-check"></i></a>';
                         }
                     }
                     return $btn;
@@ -54,13 +54,13 @@ class ClientManagementController extends Controller
                     $btn = '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-info btn-sm viewDetails"><i class="ri-eye-line"></i></a> ';
 
                     if ($row->status == 'pending') {
-                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser">Approve</a> ';
-                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm cancelUser">Cancel</a>';
+                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser" title="Approve"><i class="fa-solid fa-check"></i></a> ';
+                        $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm cancelUser" title="Cancel"><i class="fa-solid fa-xmark"></i></a>';
                     } else {
                         if ($row->status == 'approved') {
-                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-warning btn-sm cancelUser">Block</a>';
+                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-warning btn-sm cancelUser" title="Block"><i class="fa-solid fa-ban"></i></a>';
                         } else {
-                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser">Unblock/Approve</a>';
+                            $btn .= '<a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-success btn-sm approveUser" title="Unblock/Approve"><i class="fa-solid fa-check"></i></a>';
                         }
                     }
                     return $btn;

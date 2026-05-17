@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
@@ -69,7 +69,7 @@ class BarberBookingController extends Controller
         try {
             $user = Auth::guard("api")->user();
 
-            $booking = Booking::with(['customer.providerprofiles', 'slots.scheduleTime', 'items.service'])
+            $booking = Booking::with(['customer.provider_profiles', 'slots.scheduleTime', 'items.service'])
                 ->where('barber_id', $user->id)
                 ->where('id', $id)
                 ->first();
@@ -114,7 +114,7 @@ class BarberBookingController extends Controller
                     'image' => $booking->customer->profile_image ?? null,
                 ],
                 'location' => [
-                    'address' => $booking->customer->providerprofiles->salon_address ?? 'Address not specified',
+                    'address' => $booking->customer->provider_profiles->salon_address ?? 'Address not specified',
                     'latitude' => $booking->latitude ?? $booking->customer->latitude,
                     'longitude' => $booking->longitude ?? $booking->customer->longitude,
                 ],
@@ -147,7 +147,7 @@ class BarberBookingController extends Controller
                 return $this->error('User not authenticated');
             }
 
-            $user->load('providerprofiles');
+            $user->load('provider_profiles');
             $today = Carbon::today()->format('Y-m-d');
             $now = Carbon::now();
 
@@ -246,7 +246,7 @@ class BarberBookingController extends Controller
             $data = [
                 'hello_message' => "Hello, " . explode(' ', $user->name)[0] . "!",
                 'profile_image' => $user->profile_image ? asset($user->profile_image) : null,
-                'availability' => (bool) ($user->availability ?? optional($user->providerprofiles)->available ?? false),
+                'availability' => (bool) ($user->availability ?? optional($user->provider_profiles)->available ?? false),
                 'summary' => [
                     'appointments_today' => $appointmentsTodayCount,
                     'next_appointment_time' => $nextAppointmentData ? $nextAppointmentData['start_time'] : 'No more today',
@@ -372,3 +372,4 @@ class BarberBookingController extends Controller
     }
 
 }
+

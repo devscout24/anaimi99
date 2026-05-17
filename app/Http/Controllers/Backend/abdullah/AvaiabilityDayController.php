@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend\abdullah;
+namespace App\Http\Controllers\Backend\Abdullah;
 
 use App\Http\Controllers\Controller;
 use App\Models\AvailablityDay;
@@ -27,7 +27,9 @@ class AvaiabilityDayController extends Controller
                     return '<button class="btn btn-sm ' . $btnClass . ' js-toggle-status" data-id="' . $availabilityDay->id . '">' . $label . '</button>';
                 })
                 ->addColumn('action', function (AvailablityDay $availabilityDay) {
-                    return '<button class="btn btn-sm btn-danger js-delete" data-id="' . $availabilityDay->id . '">Delete</button>';
+                    return '<button class="btn btn-sm btn-danger js-delete" data-id="' . $availabilityDay->id . '">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>';
                 })
                 ->rawColumns(['status', 'action'])
                 ->make(true);
@@ -110,3 +112,4 @@ class AvaiabilityDayController extends Controller
         ]);
     }
 }
+

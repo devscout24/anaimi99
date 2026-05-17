@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\ScheduleDay;
@@ -102,7 +102,7 @@ class ScheduleController extends Controller
             $existingSchedule = ScheduleDay::where('provider_id', Auth::id())->first();
 
             if ($existingSchedule) {
-                return $this->error('Schedule already created. After that you can only block or unblock slots.');
+                return $this->success([], 'Schedule already created. After that you can only block or unblock slots.');
             }
 
             $startTime = Carbon::createFromFormat('H:i:s', $request->start_time);
@@ -244,7 +244,7 @@ class ScheduleController extends Controller
 
 
         if ($targetBarber->role === 'salon') {
-             
+
             $blockedQuery->where('salon_id', $targetBarber->id);
 
         } elseif ($targetBarber->role === 'salon_barbar') {

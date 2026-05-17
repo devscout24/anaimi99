@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend\abdullah;
+namespace App\Http\Controllers\Backend\Abdullah;
 
 use App\Http\Controllers\Controller;
 
@@ -37,8 +37,12 @@ class ServicePriceController extends Controller
                 })
                 ->addColumn('action', function (ServicePrice $servicePrice) {
                     return '
-                        <button class="btn btn-sm btn-primary js-edit" data-id="' . $servicePrice->id . '">Edit</button>
-                        <button class="btn btn-sm btn-danger js-delete" data-id="' . $servicePrice->id . '">Delete</button>
+                        <button class="btn btn-sm btn-primary js-edit" data-id="' . $servicePrice->id . '">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger js-delete" data-id="' . $servicePrice->id . '">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
                     ';
                 })
                 ->rawColumns(['action'])
@@ -116,6 +120,5 @@ class ServicePriceController extends Controller
             'message' => 'Deleted successfully',
         ]);
     }
-
-
 }
+

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 
 use App\Http\Controllers\Controller;
@@ -111,10 +111,12 @@ class AuthController extends Controller
                 : (in_array($requestedRole, $validProviderRoles) ? $requestedRole : null);
 
             if ($resolvedUserType && ($request->experience || in_array($requestedRole, $validProviderRoles))) {
-                $user->providerprofiles()->create([
+                $user->provider_profiles()->create([
                     'experience'  => $request->experience ?? null,
                     'user_type'   => $resolvedUserType,
                     'postal_code' => $request->postal_code ?? null,
+                    'business_name' => $request->salon_name ?? null,
+                    'salon_address' => $request->salon_address ?? null,
                     'user_id'     => $user->id,
                 ]);
             }

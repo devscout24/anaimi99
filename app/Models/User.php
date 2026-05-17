@@ -91,7 +91,7 @@ class User extends Authenticatable implements JWTSubject
         'remember_token',
     ];
 
-    public function providerprofiles()
+    public function provider_profiles()
     {
         return $this->hasOne(ProviderProfile::class, 'user_id');
     }

@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\ReviewController;
 
 
 
@@ -18,30 +18,25 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('otp/check', 'checkOtp');
     Route::post('reset/password', 'resetPassword');
     Route::post('/resend/otp', 'resendOtp');
-
-
-
 });
 
 
 
 Route::middleware('auth:api')->group(function () {
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('/user/profile/set', 'userProfileSet');
-    Route::post('/profile/image/update','ProfileImageUpdate');
+    Route::controller(AuthController::class)->group(function () {
+        Route::post('/user/profile/set', 'userProfileSet');
+        Route::post('/profile/image/update', 'ProfileImageUpdate');
 
-     Route::post('/change/password', 'changePassword');
+        Route::post('/change/password', 'changePassword');
 
-     Route::post('/delete/account', 'deleteAccount');
-     Route::post('/fcm/token', 'fcmToken');
-     Route::post('/user/profile/get', 'userProfileGet');
-     Route::post('/user/profile/update', 'userProfileUpdate');
-
+        Route::post('/delete/account', 'deleteAccount');
+        Route::post('/fcm/token', 'fcmToken');
+        Route::post('/user/profile/get', 'userProfileGet');
+        Route::post('/user/profile/update', 'userProfileUpdate');
+    });
 });
-
-
-});
-require __DIR__ . '/shahin.php';
+require __DIR__ . '/Shahin.php';
 
 require __DIR__ . '/api_abdullah.php';
+

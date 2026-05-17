@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReviewRating;
@@ -28,7 +28,7 @@ class SalonProfileController extends Controller
                 return $this->error('User not authenticated');
             }
 
-            $user->load(['imageGallery', 'providerprofiles']);
+            $user->load(['imageGallery', 'provider_profiles']);
 
             if ($type === 'information') {
                 return $this->getInformation($user);
@@ -37,7 +37,6 @@ class SalonProfileController extends Controller
             } else {
                 return $this->validationError('Invalid type. Use "information" or "reviews".');
             }
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
@@ -72,16 +71,19 @@ class SalonProfileController extends Controller
                 'email' => $user->email,
                 'profile_image' => $user->profile_image ? asset($user->profile_image) : null,
                 'avg_rating' => (float) $avgRating,
+                'availability_status' => $user->availability ?? null,
                 'review_count' => $reviewCount,
+                'role'=> $user->role,
             ],
             'information' => [
                 'representative_name' => $user->name,
                 'phone' => $user->phone,
                 'email' => $user->email,
-                'since' => $user->created_at ? $user->created_at->format('Y') : null,
-                'about' => $user->about ?? $user->providerprofiles->about ?? null,
-                'business_name' => $user->business_name ?? $user->providerprofiles->business_name ?? null,
-                'salon_address' => $user->salon_address ?? $user->providerprofiles->salon_address ?? null,
+                'postal_code' => $user->provider_profiles->postal_code ?? null,
+                'since' => $user->provider_profiles ? $user->provider_profiles->since ?? null : null,
+                'about' => $user->about ?? $user->provider_profiles->about ?? null,
+                'business_name' => $user->business_name ?? $user->provider_profiles->business_name ?? null,
+                'salon_address' => $user->salon_address ?? $user->provider_profiles->salon_address ?? null,
                 'gallery_images' => $gallery,
             ]
         ];

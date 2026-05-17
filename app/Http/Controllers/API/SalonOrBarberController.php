@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -20,7 +20,7 @@ class SalonOrBarberController extends Controller
      *  - latitude    (required) : user's current latitude
      *  - longitude   (required) : user's current longitude
      *  - radius      (optional) : search radius in KM for home_barbar, default 50
-     *  - search      (optional) : search by name or salon_address (from providerprofiles)
+     *  - search      (optional) : search by name or salon_address (from provider_profiles)
      *  - type        (optional) : 'salon' | 'home_barbar' | null = both
      *                             → salon      : radius restriction yok, name/address search
      *                             → home_barbar: only within radius, sorted by distance
@@ -76,23 +76,23 @@ class SalonOrBarberController extends Controller
                 /*
                  * SALON MODE
                  * - No radius restriction (show all salons)
-                 * - Search: users.name  OR  providerprofiles.salon_address
-                 * - Join providerprofiles so we can search salon_address & return business info
+                 * - Search: users.name  OR  provider_profiles.salon_address
+                 * - Join provider_profiles so we can search salon_address & return business info
                  */
                 $query->where('users.role', 'salon')
-                      ->leftJoin('providerprofiles', 'providerprofiles.user_id', '=', 'users.id')
+                      ->leftJoin('provider_profiles', 'provider_profiles.user_id', '=', 'users.id')
                       ->addSelect([
-                          'providerprofiles.business_name',
-                          'providerprofiles.salon_address',
-                          'providerprofiles.about',
+                          'provider_profiles.business_name',
+                          'provider_profiles.salon_address',
+                          'provider_profiles.about',
                       ]);
 
                 if ($request->filled('search')) {
                     $search = '%' . $request->search . '%';
                     $query->where(function ($q) use ($search) {
                         $q->where('users.name', 'like', $search)
-                          ->orWhere('providerprofiles.business_name', 'like', $search)
-                          ->orWhere('providerprofiles.salon_address', 'like', $search);
+                          ->orWhere('provider_profiles.business_name', 'like', $search)
+                          ->orWhere('provider_profiles.salon_address', 'like', $search);
                     });
                 }
 
@@ -230,7 +230,7 @@ class SalonOrBarberController extends Controller
 
     /**
      * Format a user object into a clean response array.
-     * $isSalon = true when the query already joined providerprofiles (type=salon).
+     * $isSalon = true when the query already joined provider_profiles (type=salon).
      */
     private function formatUser(User $user, bool $isSalon = false): array
     {
@@ -285,7 +285,7 @@ class SalonOrBarberController extends Controller
             'break_time'          => $schedule?->break_time         ?? null,
         ];
 
-        // Extra fields only for salon (joined from providerprofiles)
+        // Extra fields only for salon (joined from provider_profiles)
         if ($isSalon) {
             $response['business_name']  = $user->business_name  ?? null;
             $response['salon_address']  = $user->salon_address  ?? null;
@@ -312,3 +312,4 @@ class SalonOrBarberController extends Controller
         return $earthRadius * 2 * asin(sqrt($a));
     }
 }
+

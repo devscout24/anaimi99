@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend\abdullah;
+namespace App\Http\Controllers\Backend\Abdullah;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dyanamic;
@@ -10,26 +10,27 @@ class DynamicController extends Controller
 {
     public function index(Request $request)
     {
-        if(request()->ajax()) {
-            $data = Dyanamic::latest()->get();
-            return datatables()->of($data)
+        if ($request->ajax()) {
+            $data = \App\Models\Dyanamic::latest()->get();
+            return \Yajra\DataTables\Facades\DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('title', function($row){
-                    return $row->title;
+                ->editColumn('description', function ($row) {
+                    return \Illuminate\Support\Str::limit(strip_tags($row->description), 100);
                 })
-                ->addColumn('description', function($row){
-                    return $row->description;
-                })
-                ->addColumn('action', function($row){
-                    $btn = '<a href="'.route('admin.dynamic.edit', $row->id).'" class="edit btn btn-primary btn-sm m-2">Edit</a>';
-                    $btn .= '<form action="'.route('admin.dynamic.destroy', $row->id).'" method="POST" style="display:inline-block;">
-                                '.csrf_field().'
-                                '.method_field('DELETE').'';    
-                    $btn .= '<button type="submit" class="delete btn btn-danger btn-sm" onclick="return confirm(\'Are you sure?\')">Delete</button>
+                ->addColumn('action', function ($row) {
+                    $btn = '<a href="' . route('admin.dynamic.edit', ['dynamic' => $row->id]) . '" class="edit btn btn-primary btn-sm m-1">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </a>';
+                    $btn .= '<form action="' . route('admin.dynamic.destroy', ['dynamic' => $row->id]) . '" method="POST" style="display:inline-block;">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '';
+                    $btn .= '<button type="submit" class="delete btn btn-danger btn-sm m-1" onclick="return confirm(\'Are you sure?\')">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
                             </form>';
                     return $btn;
                 })
-                ->rawColumns(['title', 'description', 'action'])
+                ->rawColumns(['action'])
                 ->make(true);
         }
         return view('backend.dynamic.index');
@@ -48,13 +49,13 @@ class DynamicController extends Controller
             'description' => 'nullable|string',
         ]);
 
-       $dynamic = new Dyanamic();
-       $dynamic->title = $request->input('title');
-       $dynamic->description = $request->input('description');
-       $dynamic->save();
+        $dynamic = new Dyanamic();
+        $dynamic->title = $request->input('title');
+        $dynamic->description = $request->input('description');
+        $dynamic->save();
 
         // Redirect back with a success message
-        return redirect()->route('admin.dynamic.index')->with('success', 'Dyanamic created successfully.');  
+        return redirect()->route('admin.dynamic.index')->with('success', 'Dyanamic created successfully.');
     }
     public function edit($id)
     {
@@ -62,29 +63,30 @@ class DynamicController extends Controller
         return view('backend.dynamic.edit', compact('dynamic'));
     }
 
-        public function update(Request $request, $id)
-        {
-            // Validate the request data
-            $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-            ]);
-    
-            $dynamic = Dyanamic::findOrFail($id);
-            $dynamic->title = $request->input('title');
-            $dynamic->description = $request->input('description');
-            $dynamic->save();
-    
-            // Redirect back with a success message
-            return redirect()->route('admin.dynamic.index')->with('success', 'Dyanamic updated successfully.');  
-        }
-    
-        public function destroy($id)
-        {
-            $dynamic = Dyanamic::findOrFail($id);
-            $dynamic->delete();
-    
-            // Redirect back with a success message
-            return redirect()->route('admin.dynamic.index')->with('success', 'Dyanamic deleted successfully.');  
-        }
+    public function update(Request $request, $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $dynamic = Dyanamic::findOrFail($id);
+        $dynamic->title = $request->input('title');
+        $dynamic->description = $request->input('description');
+        $dynamic->save();
+
+        // Redirect back with a success message
+        return redirect()->route('admin.dynamic.index')->with('success', 'Dyanamic updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $dynamic = Dyanamic::findOrFail($id);
+        $dynamic->delete();
+
+        // Redirect back with a success message
+        return redirect()->route('admin.dynamic.index')->with('success', 'Dyanamic deleted successfully.');
+    }
 }
+
