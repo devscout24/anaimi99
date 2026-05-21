@@ -222,7 +222,7 @@ class ScheduleController extends Controller
         );
 
         if (!$targetBarber) {
-            return $this->validationError('Barber not found.');
+            return $this->validationError([], 'Barber not found.');
         }
 
         $owner = $this->resolveScheduleOwnerForBarber($targetBarber);
@@ -233,7 +233,7 @@ class ScheduleController extends Controller
             ->first();
 
         if (!$schedule) {
-            return $this->validationError('No schedule found.');
+            return $this->validationError([],'No schedule found.');
         }
 
 
@@ -309,7 +309,7 @@ class ScheduleController extends Controller
         return $this->success($responseData);
 
     } catch (\Exception $e) {
-        return $this->error($e->getMessage());
+        return $this->error([],$e->getMessage());
     }
 }
 

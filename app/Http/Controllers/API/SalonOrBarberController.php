@@ -57,19 +57,23 @@ class SalonOrBarberController extends Controller
                               SIN( RADIANS(?) ) * SIN( RADIANS(latitude) ) ) )';
 
             // Base query with distance column
-            $query = User::selectRaw("
+            $query = User::selectRaw(
+                "
                         users.id, users.name, users.phone, users.email,
                         users.profile_image, users.cover_image,
                         users.latitude, users.longitude,
                         users.role, users.availability, users.status,
                         users.salon_barbar_status,
                         {$distanceSql} AS distance",
-                        [$userLat, $userLng, $userLat]
-                    )
-                    ->where('users.status', 'approved')
-                    ->where('users.block_status', 'unblock')
-                    ->whereNotNull('users.latitude')
-                    ->whereNotNull('users.longitude');
+                [$userLat, $userLng, $userLat]
+            )
+                ->withCount(['reviewsAsSalon', 'reviewsAsBarber', 'salonBarbers'])
+                ->withAvg('reviewsAsSalon', 'rating')
+                ->withAvg('reviewsAsBarber', 'rating')
+                ->where('users.status', 'approved')
+                ->where('users.block_status', 'unblock')
+                ->whereNotNull('users.latitude')
+                ->whereNotNull('users.longitude');
 
             // ── TYPE LOGIC ───────────────────────────────────────────────────
             if ($type === 'salon') {
@@ -80,22 +84,21 @@ class SalonOrBarberController extends Controller
                  * - Join provider_profiles so we can search salon_address & return business info
                  */
                 $query->where('users.role', 'salon')
-                      ->leftJoin('provider_profiles', 'provider_profiles.user_id', '=', 'users.id')
-                      ->addSelect([
-                          'provider_profiles.business_name',
-                          'provider_profiles.salon_address',
-                          'provider_profiles.about',
-                      ]);
+                    ->leftJoin('provider_profiles', 'provider_profiles.user_id', '=', 'users.id')
+                    ->addSelect([
+                        'provider_profiles.business_name',
+                        'provider_profiles.salon_address',
+                        'provider_profiles.about',
+                    ]);
 
                 if ($request->filled('search')) {
                     $search = '%' . $request->search . '%';
                     $query->where(function ($q) use ($search) {
                         $q->where('users.name', 'like', $search)
-                          ->orWhere('provider_profiles.business_name', 'like', $search)
-                          ->orWhere('provider_profiles.salon_address', 'like', $search);
+                            ->orWhere('provider_profiles.business_name', 'like', $search)
+                            ->orWhere('provider_profiles.salon_address', 'like', $search);
                     });
                 }
-
             } elseif ($type === 'home_barbar') {
                 /*
                  * HOME BARBAR MODE
@@ -103,16 +106,15 @@ class SalonOrBarberController extends Controller
                  * - Search: users.name only
                  */
                 $query->where('users.role', 'home_barbar')
-                      ->havingRaw("{$distanceSql} <= ?", [$userLat, $userLng, $userLat, $radius]);
+                    ->havingRaw("{$distanceSql} <= ?", [$userLat, $userLng, $userLat, $radius]);
 
                 if ($request->filled('search')) {
                     $search = '%' . $request->search . '%';
                     $query->where(function ($q) use ($search) {
                         $q->where('users.name', 'like', $search)
-                          ->orWhere('users.phone', 'like', $search);
+                            ->orWhere('users.phone', 'like', $search);
                     });
                 }
-
             } else {
                 /*
                  * BOTH (no type sent)
@@ -120,13 +122,13 @@ class SalonOrBarberController extends Controller
                  * - Search: name only
                  */
                 $query->whereIn('users.role', ['salon', 'home_barbar'])
-                      ->havingRaw("{$distanceSql} <= ?", [$userLat, $userLng, $userLat, $radius]);
+                    ->havingRaw("{$distanceSql} <= ?", [$userLat, $userLng, $userLat, $radius]);
 
                 if ($request->filled('search')) {
                     $search = '%' . $request->search . '%';
                     $query->where(function ($q) use ($search) {
                         $q->where('users.name', 'like', $search)
-                          ->orWhere('users.phone', 'like', $search);
+                            ->orWhere('users.phone', 'like', $search);
                     });
                 }
             }
@@ -138,7 +140,7 @@ class SalonOrBarberController extends Controller
 
             // ── ORDER: available first → nearest ─────────────────────────────
             $query->orderByDesc('users.availability')
-                  ->orderBy('distance', 'asc');
+                ->orderBy('distance', 'asc');
 
             // ── EXECUTE QUERY ─────────────────────────────────────────────────
             // per_page না দিলে সব data এক সাথে দেখায়, দিলে paginate করে
@@ -153,7 +155,6 @@ class SalonOrBarberController extends Controller
                     'list'  => $data,
                     'total' => $collection->count(),
                 ], 'Salon / Barber list fetched successfully');
-
             } else {
                 $results = $query->with(['imageGallery', 'scheduleDay'])->paginate($perPage);
 
@@ -169,7 +170,6 @@ class SalonOrBarberController extends Controller
                     'per_page'     => $results->perPage(),
                 ], 'Salon / Barber list fetched successfully');
             }
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
@@ -193,6 +193,9 @@ class SalonOrBarberController extends Controller
 
         try {
             $user = User::with(['imageGallery', 'scheduleDay'])
+                ->withCount(['reviewsAsSalon', 'reviewsAsBarber', 'salonBarbers'])
+                ->withAvg('reviewsAsSalon', 'rating')
+                ->withAvg('reviewsAsBarber', 'rating')
                 ->whereIn('role', ['salon', 'home_barbar'])
                 ->where('block_status', 'unblock')
                 ->find($id);
@@ -203,8 +206,10 @@ class SalonOrBarberController extends Controller
 
             // Calculate distance if caller sends their location
             $distance = null;
-            if ($request->filled('latitude') && $request->filled('longitude') &&
-                $user->latitude && $user->longitude) {
+            if (
+                $request->filled('latitude') && $request->filled('longitude') &&
+                $user->latitude && $user->longitude
+            ) {
                 $distance = $this->haversine(
                     (float) $request->latitude,
                     (float) $request->longitude,
@@ -217,7 +222,6 @@ class SalonOrBarberController extends Controller
             $formatted['distance_km'] = $distance ? round($distance, 2) : null;
 
             return $this->success($formatted, 'Details fetched successfully');
-
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
@@ -235,14 +239,14 @@ class SalonOrBarberController extends Controller
     private function formatUser(User $user, bool $isSalon = false): array
     {
         // Gallery images with full URL
-      $gallery = $user->imageGallery
-    ? $user->imageGallery->map(function ($img) {
-        return [
-            'id' => $img->id,
-            'image' => $img->image ? asset($img->image) : null,
-        ];
-    })->values()
-    : [];
+        $gallery = $user->imageGallery
+            ? $user->imageGallery->map(function ($img) {
+                return [
+                    'id' => $img->id,
+                    'image' => $img->image ? asset($img->image) : null,
+                ];
+            })->values()
+            : [];
 
         // Schedule / open-close time
         $schedule  = $user->scheduleDay;
@@ -255,6 +259,16 @@ class SalonOrBarberController extends Controller
             $isOpenNow = ($now >= $openTime && $now <= $closeTime);
         }
 
+        $avgRating = 0;
+        $reviewCount = 0;
+        if ($user->role === 'salon') {
+            $avgRating = $user->reviews_as_salon_avg_rating ?? 0;
+            $reviewCount = $user->reviews_as_salon_count ?? 0;
+        } else {
+            $avgRating = $user->reviews_as_barber_avg_rating ?? 0;
+            $reviewCount = $user->reviews_as_barber_count ?? 0;
+        }
+
         $response = [
             'id'                  => $user->id,
             'name'                => $user->name,
@@ -262,20 +276,23 @@ class SalonOrBarberController extends Controller
             'email'               => $user->email,
             'role'                => $user->role,
             'profile_image'       => $user->profile_image
-                                        ? asset($user->profile_image)
-                                        : null,
+                ? asset($user->profile_image)
+                : null,
             'cover_image'         => $user->cover_image
-                                        ? asset($user->cover_image)
-                                        : null,
+                ? asset($user->cover_image)
+                : null,
             'gallery_images'      => $gallery,
             'latitude'            => $user->latitude,
             'longitude'           => $user->longitude,
+            'avg_rating'          => round((float)$avgRating, 1),
+            'review_count'        => (int)$reviewCount,
+            'barber_count'        => ($user->role === 'salon') ? (int)($user->salon_barbers_count ?? 0) : 0,
             'availability'        => (bool) $user->availability,
             'status'              => $user->status,
             'salon_barbar_status' => (bool) $user->salon_barbar_status,
             'distance_km'         => isset($user->distance)
-                                        ? round((float) $user->distance, 2)
-                                        : null,
+                ? round((float) $user->distance, 2)
+                : null,
             // Schedule
             'open_time'           => $openTime,
             'close_time'          => $closeTime,
@@ -307,9 +324,32 @@ class SalonOrBarberController extends Controller
         $dLng = deg2rad($lng2 - $lng1);
 
         $a = sin($dLat / 2) ** 2
-           + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
 
         return $earthRadius * 2 * asin(sqrt($a));
     }
-}
 
+
+    public function salonBarberList($salon_id)
+    {
+        $salon = User::query()->where('id', $salon_id)->where('role', 'salon')->first();
+
+        if (!$salon) {
+            return $this->notFound([], 'Salon not found.');
+        }
+
+        $barbers = $salon->salonBarbers()->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'phone' => $item->phone,
+                'email' => $item->email,
+                'profile_image' => $item->profile_image ? asset($item->profile_image) : null,
+                'availability' => (bool) $item->availability,
+                'status' => $item->status,
+            ];
+        });
+
+        return $this->success($barbers, 'Barber list fetched successfully');
+    }
+}

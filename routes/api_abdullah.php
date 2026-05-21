@@ -10,16 +10,14 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/serviceIndex', [ServiceController::class, 'serviceIndex']);
 // Route::get('/servicePriceIndex', [ServiceController::class, 'servicePriceIndex']);
 
-Route::middleware(['auth:api'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:api', 'check.approval'])->prefix('admin')->name('admin.')->group(function () {
 
-   Route::get('/serviceIndex', [ServiceProvideController::class, 'serviceIndex']);
-   Route::get('/servicePriceIndex', [ServiceProvideController::class, 'servicePriceIndex']);
+  Route::get('/serviceIndex', [ServiceProvideController::class, 'serviceIndex']);
+  Route::get('/servicePriceIndex', [ServiceProvideController::class, 'servicePriceIndex']);
 
   Route::get('availabilityDays', [ServiceProvideController::class, 'availabilityIndex']);
-
 });
 
 
 Route::get('/help/index', [HelpController::class, 'index']);
 Route::post('/help/store', [HelpController::class, 'store']);
-

@@ -22,7 +22,7 @@ Route::controller(AuthController::class)->group(function () {
 
 
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'check.approval'])->group(function () {
 
     Route::controller(AuthController::class)->group(function () {
         Route::post('/user/profile/set', 'userProfileSet');
@@ -39,4 +39,3 @@ Route::middleware('auth:api')->group(function () {
 require __DIR__ . '/Shahin.php';
 
 require __DIR__ . '/api_abdullah.php';
-

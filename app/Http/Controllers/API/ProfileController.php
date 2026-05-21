@@ -220,11 +220,11 @@ public function updateLocation()
 {
     try {
         $user = Auth::guard('api')->user();
-        $profile = $user->provider_profiles;
+        // $profile = $user->provider_profiles;
 
-        if (!$profile) {
-            return response()->json(['error' => 'Profile not found.'], 404);
-        }
+        // if (!$profile) {
+        //     return response()->json(['error' => 'Profile not found.'], 404);
+        // }
 
         $latitude = request('latitude');
         $longitude = request('longitude');

@@ -127,6 +127,7 @@ class AuthController extends Controller
             $token = JWTAuth::fromUser($user);
             $data = [
                 'token' => $token,
+                'status' => $user->status,
                 'user' => $user
             ];
             return $this->success($data, 'User created successfully', 200);

@@ -27,7 +27,7 @@ use App\Http\Controllers\API\SalonLoyalityController;
 use App\Http\Controllers\API\SalonOrBarberController;
 use App\Http\Controllers\API\SalonPriceSetcontroller;
 use App\Http\Controllers\API\SalonProfileController;
-use App\Http\Controllers\Api\SalonServiceController;
+use App\Http\Controllers\API\SalonServiceController;
 use App\Http\Controllers\API\ScheduleController;
 
 use App\Http\Controllers\API\StripeWebhookController;
@@ -48,7 +48,7 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']
 
 
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'check.approval'])->group(function () {
 
 
     Route::controller(LoyalityBookingController::class)->group(function () {
@@ -130,11 +130,10 @@ Route::middleware('auth:api')->group(function () {
     });
 
 
-   Route::controller(SalonServiceController::class)->group(function () {
+    Route::controller(SalonServiceController::class)->group(function () {
         Route::post('/salon/service/add', 'addSalonService');
         Route::get('/salon/service/list', 'salonServiceList');
         Route::post('/salon/service/delete/{id}', 'deleteSalonService');
-
     });
 
 
@@ -201,11 +200,11 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::controller(HelpandSupportController::class)->group(function () {
-      Route::post('help/support', 'submitHelpSupport');
+        Route::post('help/support', 'submitHelpSupport');
     });
 
 
-  Route::controller(SalonServiceController::class)->group(function () {
+    Route::controller(SalonServiceController::class)->group(function () {
         Route::get('customer/salon/service/list/{salon_id}', 'customerSalonServiceList');
         Route::get('customer/barber/service/list', 'customerBarberServiceList');
     });
@@ -219,6 +218,8 @@ Route::middleware('auth:api')->group(function () {
 
         // Details: GET /salon-or-barber/{id}?latitude=&longitude=
         Route::get('salon-or-barber/{id}', 'show');
+
+        Route::get('salon/barber/list/{salon_id}', 'salonBarberList');
     });
 
     Route::controller(BarberschedulebookingController::class)->group(function () {
@@ -266,7 +267,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
 
-      Route::controller(ChatController::class)->group(function () {
+    Route::controller(ChatController::class)->group(function () {
         Route::post('/chat/send', 'sendMessage');
         Route::get('/chat/mark/read/{conversation_id}', 'markAsRead');
         Route::get('/chat/get/{conversation_id}', 'getConversation');
@@ -274,10 +275,4 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/chat/delete/{chat_id}', 'chatdelete');
         Route::get('/chat/image/delete/{image_id}', 'chatImageDelete');
     });
-
-
-
-
-
-
 });
