@@ -125,13 +125,13 @@
         <div class="service-price-hero">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
                 <div>
-                    <span class="service-price-badge mb-2">Admin / Service Prices</span>
-                    <h3>Manage service price records</h3>
-                    <p>Create, edit, and remove pricing rows from one screen.</p>
+                    <span class="service-price-badge mb-2">{{ __('admin.admin_service_prices') }}</span>
+                    <h3>{{ __('admin.manage_service_price_records') }}</h3>
+                    <p>{{ __('admin.service_price_help') }}</p>
                 </div>
                 <div class="text-md-end">
-                    <small class="d-block text-white-50">Quick actions</small>
-                    <a href="#service-price-form" class="btn btn-light btn-sm mt-2">Jump to form</a>
+                    <small class="d-block text-white-50">{{ __('admin.quick_actions') }}</small>
+                    <a href="#service-price-form" class="btn btn-light btn-sm mt-2">{{ __('admin.jump_to_form') }}</a>
                 </div>
             </div>
         </div>
@@ -142,7 +142,7 @@
             <div class="col-12 col-lg-8">
                 <div class="card service-price-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Service Prices</h5>
+                        <h5 class="mb-0">{{ __('admin.service_prices') }}</h5>
                     </div>
 
                     <div class="card-body">
@@ -151,13 +151,13 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Service</th>
-                                        <th>Type</th>
-                                        <th>Time</th>
-                                        <th>Price</th>
-                                        <th>Discount</th>
-                                        <th>Created By</th>
-                                        <th>Action</th>
+                                        <th>{{ __('admin.service') }}</th>
+                                        <th>{{ __('admin.type') }}</th>
+                                        <th>{{ __('admin.time') }}</th>
+                                        <th>{{ __('admin.price') }}</th>
+                                        <th>{{ __('admin.discount') }}</th>
+                                        <th>{{ __('admin.created_by') }}</th>
+                                        <th>{{ __('admin.action') }}</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -169,7 +169,7 @@
             <div class="col-12 col-lg-4">
                 <div class="card service-price-card" id="service-price-form">
                     <div class="card-header">
-                        <h5 class="mb-0" id="form-title">Add Service Price</h5>
+                        <h5 class="mb-0" id="form-title">{{ __('admin.add_service_price') }}</h5>
                     </div>
 
                     <div class="card-body service-price-form">
@@ -180,9 +180,9 @@
                             <input type="hidden" id="id">
 
                             <div class="mb-3">
-                                <label for="service_id" class="form-label">Service</label>
+                                <label for="service_id" class="form-label">{{ __('admin.service') }}</label>
                                 <select id="service_id" class="form-select">
-                                    <option value="" selected disabled>Select service</option>
+                                    <option value="" selected disabled>{{ __('admin.select_service') }}</option>
                                     @foreach ($services as $service)
                                         <option value="{{ $service->id }}">{{ $service->service_name }}</option>
                                     @endforeach
@@ -190,34 +190,34 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="created_for_type" class="form-label">Created For</label>
+                                <label for="created_for_type" class="form-label">{{ __('admin.created_for') }}</label>
                                 <select id="created_for_type" class="form-select">
-                                    <option value="" selected disabled>Select type</option>
-                                    <option value="salon">Salon</option>
-                                    <option value="barber">Barber</option>
+                                    <option value="" selected disabled>{{ __('admin.select_type') }}</option>
+                                    <option value="salon">{{ __('admin.salon') }}</option>
+                                    <option value="barber">{{ __('admin.barber') }}</option>
                                 </select>
                             </div>
 
                             <div class="mb-3">
-                                <label for="time_duration" class="form-label">Time Duration</label>
+                                <label for="time_duration" class="form-label">{{ __('admin.time_duration') }}</label>
                                 <input type="text" id="time_duration" class="form-control" autocomplete="off">
                             </div>
 
                             <div class="mb-3">
-                                <label for="price" class="form-label">Price</label>
+                                <label for="price" class="form-label">{{ __('admin.price') }}</label>
                                 <input type="number" step="0.01" min="0" id="price" class="form-control"
                                     autocomplete="off">
                             </div>
 
                             <div class="mb-3">
-                                <label for="discount" class="form-label">Discount</label>
+                                <label for="discount" class="form-label">{{ __('admin.discount') }}</label>
                                 <input type="number" step="0.01" min="0" id="discount" class="form-control"
                                     autocomplete="off">
                             </div>
 
                             <div class="service-price-actions">
-                                <button class="btn btn-primary" id="submitBtn" type="submit">Save</button>
-                                <button class="btn btn-light d-none" id="cancelBtn" type="button">Cancel</button>
+                                <button class="btn btn-primary" id="submitBtn" type="submit">{{ __('admin.save') }}</button>
+                                <button class="btn btn-light d-none" id="cancelBtn" type="button">{{ __('admin.cancel') }}</button>
                             </div>
                             
                         </form>
@@ -296,7 +296,7 @@
                         html += '<div>' + v[0] + '</div>';
                     });
                 } else {
-                    html = '<div>Something went wrong</div>';
+                    html = '<div>' + @json(__('admin.something_went_wrong')) + '</div>';
                 }
 
                 $('#error-box').removeClass('d-none').html(html);
@@ -305,8 +305,8 @@
             function resetForm() {
                 $('#service-price-form-action')[0].reset();
                 $('#id').val('');
-                $('#form-title').text('Add Service Price');
-                $('#submitBtn').text('Save');
+                $('#form-title').text(@json(__('admin.add_service_price')));
+                $('#submitBtn').text(@json(__('admin.save')));
                 $('#cancelBtn').addClass('d-none');
                 $('#error-box').addClass('d-none').html('');
 
@@ -362,8 +362,8 @@
                     $('#price').val(res.price);
                     $('#discount').val(res.discount);
 
-                    $('#form-title').text('Edit Service Price');
-                    $('#submitBtn').text('Update');
+                    $('#form-title').text(@json(__('admin.edit_service_price')));
+                    $('#submitBtn').text(@json(__('admin.update')));
                     $('#cancelBtn').removeClass('d-none');
                     $('#error-box').addClass('d-none').html('');
                 });
@@ -372,7 +372,7 @@
             $(document).on('click', '.js-delete', function() {
                 let id = $(this).data('id');
 
-                if (confirm('Delete this service price?')) {
+                if (confirm(@json(__('admin.delete_service_price_confirm')))) {
                     $.ajax({
                         url: "{{ route('admin.service-prices.destroy', ':id') }}".replace(':id', id),
                         method: 'DELETE',

@@ -22,26 +22,26 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('tax', 10, 2)->default(0);
             $table->integer('total_service_quantity')->default(0);
-             $table->decimal('total_price', 10, 2)->default(0);
+            $table->decimal('total_price', 10, 2)->default(0);
 
 
 
-            $table->enum('booking_type',['salon_auto','salon_barber','home_barber','as_soon_possible','online','custom','cod','loyalty'])->default('salon_auto');
-            $table->enum('payment_type',['online','onsite','cod','loyalty'])->default('online');
-
+            $table->enum('booking_type', ['salon_auto', 'salon_barber', 'home_barber', 'as_soon_possible', 'online', 'custom', 'cod', 'loyalty'])->default('salon_auto');
+            $table->enum('payment_type', ['online', 'onsite', 'cod', 'loyalty'])->default('online');
 
             $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
-           $table->enum('status', [
-                                'pending',
-                                'search_barber',
-                                'accepted',
-                                'confirmed',
-                                'on_the_way',
-
-                                'arrived',
-                                'completed',
-                                'cancelled'
-                            ])->default('pending');
+            $table->enum('status', [
+                'pending',
+                'search_barber',
+                'accepted',
+                'confirmed',
+                'on_the_way',
+                'in_progress',
+                'arrived',
+                'completed',
+                'cancelled'
+            ])->default('pending');
+            $table->timestamp('last_assigned_at')->nullable();
 
 
             $table->date('booking_date')->nullable();

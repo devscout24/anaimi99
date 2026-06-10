@@ -1,15 +1,15 @@
 @extends('backend.app')
-@section('title', 'Booking Report')
+@section('title', __('admin.booking_report'))
 @section('content')
 <!-- start page title -->
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">Booking Report</h4>
+            <h4 class="mb-sm-0">{{ __('admin.booking_report') }}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Reports</a></li>
-                    <li class="breadcrumb-item active">Bookings</li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">{{ __('admin.reports') }}</a></li>
+                    <li class="breadcrumb-item active">{{ __('admin.bookings') }}</li>
                 </ol>
             </div>
         </div>
@@ -24,7 +24,7 @@
                 <div class="row g-4 align-items-center">
                     <div class="col-sm-auto">
                         <div>
-                            <h4 class="card-title mb-0">Booking List</h4>
+                            <h4 class="card-title mb-0">{{ __('admin.booking_list') }}</h4>
                         </div>
                     </div>
                 </div>
@@ -33,26 +33,26 @@
                 <div class="row g-3">
                     <div class="col-xxl-3 col-sm-4">
                         <div class="input-group">
-                            <span class="input-group-text">From</span>
+                            <span class="input-group-text">{{ __('admin.from') }}</span>
                             <input type="date" id="start_date" class="form-control">
                         </div>
                     </div>
                     <div class="col-xxl-3 col-sm-4">
                         <div class="input-group">
-                            <span class="input-group-text">To</span>
+                            <span class="input-group-text">{{ __('admin.to') }}</span>
                             <input type="date" id="end_date" class="form-control">
                         </div>
                     </div>
                     <div class="col-xxl-2 col-sm-4">
                         <select id="data" class="form-control">
-                            <option value="">Status (All)</option>
-                            <option value="pending">Pending</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="">{{ __('admin.status_all') }}</option>
+                            <option value="pending">{{ __('admin.pending') }}</option>
+                            <option value="completed">{{ __('admin.completed') }}</option>
+                            <option value="cancelled">{{ __('admin.cancelled') }}</option>
                         </select>
                     </div>
                     <div class="col-xxl-1 col-sm-4">
-                        <button id="filter" class="btn btn-primary w-100">Filter</button>
+                        <button id="filter" class="btn btn-primary w-100">{{ __('admin.filter') }}</button>
                     </div>
                 </div>
             </div>
@@ -62,12 +62,12 @@
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>Invoice</th>
-                                <th>Customer</th>
-                                <th>Provider</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
+                                <th>{{ __('admin.invoice') }}</th>
+                                <th>{{ __('admin.customer') }}</th>
+                                <th>{{ __('admin.provider') }}</th>
+                                <th>{{ __('admin.amount') }}</th>
+                                <th>{{ __('admin.status') }}</th>
+                                <th>{{ __('admin.date') }}</th>
                             </tr>
                         </thead>
                     </table>

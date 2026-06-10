@@ -13,7 +13,7 @@
         <div class="col-12 col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Availability Days List</h5>
+                    <h5 class="mb-0">{{ __('admin.availability_days_list') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -21,9 +21,9 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Day</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th>{{ __('admin.day') }}</th>
+                                    <th>{{ __('admin.status') }}</th>
+                                    <th>{{ __('admin.action') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -35,16 +35,16 @@
         <div class="col-12 col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Add Availability Day</h5>
+                    <h5 class="mb-0">{{ __('admin.add_availability_day') }}</h5>
                 </div>
                 <div class="card-body">
                     <form id="form">
                         @csrf
 
                         <div class="mb-3">
-                            <label class="form-label" for="day_name">Day Name</label>
+                            <label class="form-label" for="day_name">{{ __('admin.day_name') }}</label>
                             <select class="form-select" id="day_name" name="day_name" required>
-                                <option value="">Select day</option>
+                                <option value="">{{ __('admin.select_day') }}</option>
                                 @foreach (\App\Models\AvailablityDay::DAYS as $day)
                                     <option value="{{ $day }}" {{ old('day_name') === $day ? 'selected' : '' }}>{{ $day }}</option>
                                 @endforeach
@@ -54,10 +54,10 @@
                         <div class="mb-3 form-check">
                             <input type="hidden" name="is_active" value="0">
                             <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_active">Active</label>
+                            <label class="form-check-label" for="is_active">{{ __('admin.active') }}</label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="submit" class="btn btn-primary">{{ __('admin.save') }}</button>
                     </form>
                 </div>
             </div>
@@ -97,7 +97,7 @@ $(function () {
         setTimeout(() => $('#success-msg').addClass('d-none'), 3000);
     }
 
-    function error(errors, fallback = 'Something went wrong') {
+    function error(errors, fallback = @json(__('admin.something_went_wrong'))) {
         let html = '';
 
         if (errors) {
@@ -136,7 +136,7 @@ $(function () {
     $(document).on('click', '.js-delete', function () {
         let id = $(this).data('id');
 
-        if (confirm('Delete this availability day?')) {
+        if (confirm(@json(__('admin.delete_availability_day_confirm')))) {
             $.ajax({
                 url: "{{ route('admin.availability-days.destroy', ':id') }}".replace(':id', id),
                 method: 'DELETE',

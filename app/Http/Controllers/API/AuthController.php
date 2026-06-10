@@ -10,6 +10,7 @@ use App\Mail\OtpSend;
 use App\Models\Application;
 use App\Models\AppSettings;
 use App\Models\ImageGallary;
+use App\Models\FcmToken;
 use App\Models\ShippingAddress;
 use App\Models\SocialMedias;
 use App\Models\User;
@@ -550,23 +551,29 @@ class AuthController extends Controller
 
     public function fcmToken(Request $request)
     {
-
-
         $validator = Validator::make($request->all(), [
             'fcm_token' => 'required',
-
+            'device_id' => 'nullable|string',
         ]);
         if ($validator->fails()) {
             return $this->error($validator->errors(), 'Validation Error', 422);
         }
         try {
-
-
-
             $user = Auth::guard('api')->user();
 
             $user->fcm_token = $request->fcm_token;
             $user->save();
+
+            // Save to multiple tokens table
+            FcmToken::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'token' => $request->fcm_token,
+                ],
+                [
+                    'device_id' => $request->device_id,
+                ]
+            );
 
             return $this->success($user, 'Fcm token updated successfully');
         } catch (\Exception $e) {

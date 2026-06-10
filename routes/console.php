@@ -10,4 +10,4 @@ Artisan::command('inspire', function () {
 
 // ASAP Booking Timeout Check
 Schedule::command('app:booking-check-asap-timeout')->everyMinute();
-
+Schedule::command('app:booking-check-payment-timeout')->everyMinute();

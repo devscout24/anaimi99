@@ -36,6 +36,16 @@
             </div>
 
             <div class="d-flex align-items-center">
+                <div class="dropdown ms-1 header-item">
+                    <button type="button" class="btn btn-ghost-secondary btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ strtoupper(app()->getLocale()) }}
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <h6 class="dropdown-header">{{ __('admin.language') }}</h6>
+                        <a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}" href="{{ route('language.switch', 'en') }}">{{ __('admin.english') }}</a>
+                        <a class="dropdown-item {{ app()->getLocale() === 'fr' ? 'active' : '' }}" href="{{ route('language.switch', 'fr') }}">{{ __('admin.french') }}</a>
+                    </div>
+                </div>
 
                 <div class="ms-1 header-item d-none d-sm-flex">
                     <button type="button" class="btn btn-icon btn-topbar material-shadow-none btn-ghost-secondary rounded-circle" data-toggle="fullscreen">
@@ -62,15 +72,15 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
-                        <h6 class="dropdown-header">Welcome {{ auth()->user()->name }}!</h6>
+                        <h6 class="dropdown-header">{{ __('admin.welcome', ['name' => auth()->user()->name]) }}</h6>
                         <a class="dropdown-item" href="{{ route('admin.profile-settings.edit') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Profile</span></a>
+                                class="align-middle">{{ __('admin.profile') }}</span></a>
                         <!-- Logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="dropdown-item">
                                 <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
-                                <span class="align-middle" data-key="t-logout">Logout</span>
+                                <span class="align-middle" data-key="t-logout">{{ __('admin.logout') }}</span>
                             </button>
                         </form>
                     </div>

@@ -45,11 +45,11 @@
     <div class="container-fluid py-3">
         <div class="dynamic-hero d-flex justify-content-between align-items-center flex-column flex-md-row gap-2">
             <div>
-                <h4 class="mb-1">Dynamic Content</h4>
+                <h4 class="mb-1">{{ __('admin.dynamic_content') }}</h4>
                 
             </div>
             <div class="dynamic-actions">
-                <a href="{{ route('admin.dynamic.create') }}" class="btn btn-light">Add New</a>
+                <a href="{{ route('admin.dynamic.create') }}" class="btn btn-light">{{ __('admin.add_new') }}</a>
             </div>
         </div>
 
@@ -57,16 +57,16 @@
             <div class="col-12">
                 <div class="card dynamic-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">List</h5>
+                        <h5 class="mb-0">{{ __('admin.list') }}</h5>
                     </div>
                     <div class="card-body p-3">
                         <div class="table-responsive">
                             <table id="dynamic-table" class="table table-bordered align-middle w-100 dynamic-table">
                                 <thead>
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th style="width:140px">Action</th>
+                                        <th>{{ __('admin.title') }}</th>
+                                        <th>{{ __('admin.description') }}</th>
+                                        <th style="width:140px">{{ __('admin.action') }}</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -95,7 +95,7 @@
                 ],
                 order: [[0, 'desc']],
                 lengthMenu: [10, 25, 50],
-                language: {processing: '<span class="spinner-border spinner-border-sm me-2"></span>Loading...'}
+                language: {processing: '<span class="spinner-border spinner-border-sm me-2"></span>{{ __('admin.loading') }}'}
             });
 
             // Improve layout after draw

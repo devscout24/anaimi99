@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\LoyalityAdd;
 use App\Models\LoyaltySetting;
 use App\Models\SalonLoyality;
+use App\Services\FcmService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,38 +16,47 @@ use Illuminate\Support\Facades\Validator;
 class BookingStatusManageController extends Controller
 {
     use ApiResponse;
-    public function changeStatus(Request $request ,$id){
-        $validator=Validator::make($request->all(),[
-            'status'=>'required'
+    public function changeStatus(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required'
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
-                'status'=>0,
-                'message'=>$validator->errors()
+                'status' => 0,
+                'message' => $validator->errors()
             ]);
         }
 
-        try{
-        $booking=Booking::query()->where('id',$id)->first();
+        try {
+            $booking = Booking::query()->where('id', $id)->first();
 
-        $user=Auth::guard('api')->user();
+            $user = Auth::guard('api')->user();
 
 
 
-        if($booking->salon_id == $user->id || $booking->barber_id == $user->id){
-            $booking->status=$request->status;
-            if($request->payment_status){
-                $booking->payment_status=$request->payment_status;
+            if ($booking->salon_id == $user->id || $booking->barber_id == $user->id) {
+                $booking->status = $request->status;
+                if ($request->payment_status) {
+                    $booking->payment_status = $request->payment_status;
+                }
+                $booking->save();
+
+                // Notify customer about status change
+                FcmService::sendNotification(
+                    $booking->customer_id,
+                    'Booking Update',
+                    'Your booking status has been changed to ' . $request->status . '.',
+                    ['booking_id' => $booking->id, 'status' => $request->status]
+                );
+
+                return $this->success($booking, 'Booking status changed successfully');
             }
-            $booking->save();
-           return $this->success($booking,'Booking status changed successfully');
-        }
-       return $this->success([],'booking not found');
-    }
-    catch (\Exception $e) {
+            return $this->success([], 'booking not found');
+        } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
-}
+    }
 
 
     public function completedBooking(Request $request)
@@ -161,10 +171,17 @@ class BookingStatusManageController extends Controller
                     'per_booking_loyality_point' => $points,
                     'remaining_loyality_point' => $currentLastTotal + $points,
                 ]);
+
+                // Notify customer about completed booking and points
+                FcmService::sendNotification(
+                    $booking->customer_id,
+                    'Booking Completed',
+                    'Your booking is completed. You earned ' . $points . ' loyalty points!',
+                    ['booking_id' => $booking->id, 'points' => $points]
+                );
             }
 
             return $this->success($bookings, 'Bookings marked as completed and points added successfully.');
-
         } catch (\Exception $e) {
             return $this->error('Something went wrong', $e->getMessage());
         }
@@ -197,7 +214,7 @@ class BookingStatusManageController extends Controller
             $serviceText = "{$serviceNames} ({$totalDuration} min)";
 
             // 2. Format Date/Time Text
-            $startTime = $booking->slots->sortBy(function($slot) {
+            $startTime = $booking->slots->sortBy(function ($slot) {
                 return optional($slot->scheduleTime)->scheduled_start_time;
             })->first();
 
@@ -211,11 +228,11 @@ class BookingStatusManageController extends Controller
             // 3. Loyalty points added for this booking
             $pointsAdded = LoyaltySetting::query()->first();
 
-           $barbarDetails=[
-                      'barbar_name'=>$booking->barber->name ?? 'N/A',
-                      'babrbar_profile'=>asset($booking->barber->profile_image) ?? 'N/A',
-                      'phone'=>$booking->barber->phone ??'NA',
-           ];
+            $barbarDetails = [
+                'barbar_name' => $booking->barber->name ?? 'N/A',
+                'babrbar_profile' => asset($booking->barber->profile_image) ?? 'N/A',
+                'phone' => $booking->barber->phone ?? 'NA',
+            ];
 
 
 
@@ -225,7 +242,7 @@ class BookingStatusManageController extends Controller
                 'title' => 'Service confirmed',
                 'subtitle' => 'The service was successfully completed.',
                 'loyalty_message' =>  $pointsAdded->per_booking_loyality,
-                'barbarDetails'=>$barbarDetails,
+                'barbarDetails' => $barbarDetails,
 
                 'service_info' => $serviceText,
                 'date_time_info' => $formattedDateTime,
@@ -234,12 +251,8 @@ class BookingStatusManageController extends Controller
             ];
 
             return $this->success($data, 'Booking details fetched successfully');
-
         } catch (\Exception $e) {
             return $this->error('something went wrong', $e->getMessage());
         }
     }
-
-
-
 }

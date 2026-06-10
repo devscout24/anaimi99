@@ -14,6 +14,7 @@ use App\Models\ServicePrice;
 use App\Models\SlotBlockBarber;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use App\Services\AsapBookingNotificationPayloadService;
 use App\Services\FcmService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -32,36 +33,39 @@ class AsSoonAsPossibleBookingController extends Controller
             'date' => 'required|date',
             'customer_id' => 'required|exists:users,id',
             'payment_type' => 'required|in:online,onsite,cod',
-            'slot_id' => 'required|array',
-            'slot_id.*' => 'required|exists:schedule_time_manages,id',
+            'start_time' => 'required', // Format: HH:mm (Example: 10:00)
+            'end_time' => 'nullable',   // Optional: calculated if not provided
             'service_id' => 'required|array',
             'service_id.*' => 'required|exists:services,id',
             'quantity' => 'required|array',
             'quantity.*' => 'required|numeric|min:1',
             'price' => 'required|array',
             'price.*' => 'required|numeric|min:0',
+            'subtotal' => 'nullable|numeric',
+            'tax' => 'nullable|numeric',
+            'total_price' => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
-            return $this->error('Validation Error', $validator->errors());
+            return $this->error([],'Validation Error', $validator->errors());
         }
 
         if (count($request->service_id) != count($request->price) || count($request->service_id) != count($request->quantity)) {
-            return $this->error('Service, quantity, and price count mismatch');
+            return $this->error([],'Service, quantity, and price count mismatch');
         }
 
         $customer = User::find($request->customer_id);
         if (!$customer->latitude || !$customer->longitude) {
-            return $this->error('Customer location not found. Please update your profile.');
+            return $this->error([],'Customer location not found. Please update your profile.');
         }
 
         DB::beginTransaction();
 
         try {
-            $requestedSlots = $request->slot_id;
             $date = Carbon::parse($request->date)->format('Y-m-d');
+            $startTimeString = $request->start_time;
 
-            // 1. Calculate Total Required Minutes
+            // 1. Calculate Total Required Minutes from Services
             $totalRequiredMinutes = 0;
             foreach ($request->service_id as $index => $serviceId) {
                 $servicePrice = ServicePrice::where('service_id', $serviceId)->first();
@@ -73,25 +77,9 @@ class AsSoonAsPossibleBookingController extends Controller
                 $totalRequiredMinutes += ($servicePrice->time_duration * $qty);
             }
 
-            // 2. Total Slot Minutes
-            $totalSlotMinutes = 0;
-            $slots = ScheduleTimeManage::whereIn('id', $requestedSlots)
-                ->orderBy('scheduled_start_time')
-                ->get();
-
-            if ($slots->count() !== count($requestedSlots)) {
-                throw new \Exception('Invalid slots provided.');
-            }
-
-            foreach ($slots as $slot) {
-                $start = Carbon::parse($slot->scheduled_start_time);
-                $end = Carbon::parse($slot->scheduled_end_time);
-                $totalSlotMinutes += $start->diffInMinutes($end);
-            }
-
-            if ($totalSlotMinutes < $totalRequiredMinutes) {
-                throw new \Exception("Selected slots cover {$totalSlotMinutes} minutes, but services require {$totalRequiredMinutes} minutes.");
-            }
+            // 2. Determine requested start time and minimum end time from service duration
+            $start = Carbon::parse($startTimeString);
+            $startTime = $start->format('H:i:s');
 
             // 3. Find Nearest Available Home Barber
             $userLat = (float) $customer->latitude;
@@ -106,36 +94,32 @@ class AsSoonAsPossibleBookingController extends Controller
                 ->where('role', 'home_barbar')
                 ->where('block_status', 'unblock')
                 ->where('availability', 1)
-                ->whereNotNull('latitude')
-                ->whereNotNull('longitude')
-                ->havingRaw("{$distanceSql} <= ?", [$userLat, $userLng, $userLat, $radius]);
+                // ->whereNotNull('latitude') // Temporarily lenient for testing
+                // ->whereNotNull('longitude')
+                ->havingRaw("distance <= ? OR distance IS NULL", [$radius]);
 
-            // Availability filters
-            $blockedBarbers = SlotBlockBarber::whereDate('block_date', $date)
-                ->whereIn('slot_id', $requestedSlots)
-                ->where('status', 'active')
-                ->pluck('barber_id')
-                ->filter()
-                ->toArray();
+            $barberSlots = collect();
+            $freeBarber = $query
+                ->orderBy('distance', 'asc')
+                ->get()
+                ->first(function ($barber) use ($date, $startTime, $totalRequiredMinutes, &$barberSlots) {
+                    $barberSlots = $this->findConsecutiveAvailableSlots(
+                        $barber->id,
+                        $date,
+                        $startTime,
+                        $totalRequiredMinutes
+                    );
 
-            $bookedBarbers = BookingTimeMange::whereDate('date', $date)
-                ->whereIn('schedule_id', $requestedSlots)
-                ->where('status', 'active')
-                ->pluck('barber_id')
-                ->filter()
-                ->toArray();
-
-            $unavailable = array_unique(array_merge($blockedBarbers, $bookedBarbers));
-
-            if (!empty($unavailable)) {
-                $query->whereNotIn('id', $unavailable);
-            }
-
-            $freeBarber = $query->orderBy('distance', 'asc')->first();
+                    return $barberSlots->isNotEmpty();
+                });
 
             if (!$freeBarber) {
-                throw new \Exception('No barber available nearby.');
+                $reason = "No home_barbar found within {$radius}km with enough free consecutive schedule slots from or after {$startTime}.";
+               return $this->error([], $reason);
             }
+
+            $startTime = Carbon::parse($barberSlots->first()->scheduled_start_time)->format('H:i:s');
+            $endTime = Carbon::parse($barberSlots->last()->scheduled_end_time)->format('H:i:s');
 
             // 4. Create Booking
             $booking = new Booking();
@@ -160,14 +144,16 @@ class AsSoonAsPossibleBookingController extends Controller
 
             $booking->save();
 
-            // 5. Save Items and Slots
-            foreach ($request->slot_id as $slotId) {
+            // 5. Save the consecutive schedule slots that cover the estimated service time
+            foreach ($barberSlots as $slot) {
                 BookingTimeMange::create([
                     'booking_id' => $booking->id,
                     'barber_id' => $freeBarber->id,
-                    'schedule_id' => $slotId,
+                    'schedule_id' => $slot->id,
                     'date' => $date,
                     'status' => 'active',
+                    'start_time' => $slot->scheduled_start_time,
+                    'end_time' => $slot->scheduled_end_time,
                 ]);
             }
 
@@ -202,62 +188,89 @@ class AsSoonAsPossibleBookingController extends Controller
             BookingAssignHistory::create([
                 'booking_id' => $booking->id,
                 'barber_id' => $freeBarber->id,
+                'salon_id' => $freeBarber->salon_id,
+                'booking_type' => 'as_soon_possible',
                 'status' => 'pending',
             ]);
+
+            $booking->load(['items.service']);
+            $customerAddress = $request->input('address') ?? $request->input('customer_address');
+            $notificationData = AsapBookingNotificationPayloadService::build(
+                $booking,
+                $customer,
+                $freeBarber,
+                $barberSlots,
+                $totalRequiredMinutes,
+                $customerAddress
+            );
 
             FcmService::sendNotification(
                 $freeBarber->id,
                 'New ASAP Booking Request',
                 'You have a new ASAP booking request. Please accept within 3 minutes.',
-                ['booking_id' => $booking->id]
+                $notificationData
             );
 
             DB::commit();
 
-            // 8. Stripe Payment URL if online
-            if ($request->payment_type == 'online') {
-                Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
-                $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            $booking->load(['items.service', 'slots', 'barber']);
 
-                $lineItems = [];
-                foreach ($request->service_id as $index => $serviceId) {
-                    $itemPrice = $request->price[$index] ?? 0;
-                    $itemQuantity = $request->quantity[$index] ?? 1;
-                    $unitAmount = intval(round((float) $itemPrice * 100));
-
-                    $lineItems[] = [
-                        'price_data' => [
-                            'currency' => 'usd',
-                            'product_data' => [
-                                'name' => 'Service ID: '.$serviceId,
-                            ],
-                            'unit_amount' => $unitAmount,
-                        ],
-                        'quantity' => $itemQuantity,
-                    ];
-                }
-
-                $stripeSession = Session::create([
-                    'payment_method_types' => ['card'],
-                    'line_items' => $lineItems,
-                    'mode' => 'payment',
-                    'success_url' => $frontendUrl.'/payment/success?session_id={CHECKOUT_SESSION_ID}',
-                    'cancel_url' => $frontendUrl.'/payment/cancel',
-                    'client_reference_id' => $booking->id,
-                ]);
-
-                return $this->success([
-                    'booking_id' => $booking->id,
-                    'payment_url' => $stripeSession->url,
-                ], 'ASAP Booking initiated. Please complete the payment.');
-            }
-
-            return $this->success($booking, 'ASAP Booking initiated. Searching for barber.');
-
+            return $this->success($booking, 'ASAP Booking initiated. Searching for barber. Payment will be required after a barber accepts.');
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error($e->getMessage());
         }
     }
-}
 
+    private function findConsecutiveAvailableSlots(int $barberId, string $date, string $startTime, int $requiredMinutes)
+    {
+        $blockedSlotIds = SlotBlockBarber::where('barber_id', $barberId)
+            ->whereDate('block_date', $date)
+            ->where('status', 'active')
+            ->pluck('slot_id')
+            ->toArray();
+
+        $bookedSlotIds = BookingTimeMange::where('barber_id', $barberId)
+            ->whereDate('date', $date)
+            ->whereIn('status', ['active', 'pending'])
+            ->whereNotNull('schedule_id')
+            ->pluck('schedule_id')
+            ->toArray();
+
+        $unavailableSlotIds = array_unique(array_merge($blockedSlotIds, $bookedSlotIds));
+
+        $slots = ScheduleTimeManage::where('provider_id', $barberId)
+            ->where('status', 'active')
+            ->where('scheduled_start_time', '>=', $startTime)
+            ->whereNotIn('id', $unavailableSlotIds)
+            ->orderBy('scheduled_start_time')
+            ->get();
+
+        for ($index = 0; $index < $slots->count(); $index++) {
+            $selectedSlots = collect();
+            $coveredMinutes = 0;
+            $expectedStartTime = Carbon::parse($slots[$index]->scheduled_start_time)->format('H:i:s');
+
+            for ($slotIndex = $index; $slotIndex < $slots->count(); $slotIndex++) {
+                $slot = $slots[$slotIndex];
+                $slotStart = Carbon::parse($slot->scheduled_start_time)->format('H:i:s');
+                $slotEnd = Carbon::parse($slot->scheduled_end_time)->format('H:i:s');
+
+                if ($slotStart !== $expectedStartTime) {
+                    break;
+                }
+
+                $selectedSlots->push($slot);
+                $coveredMinutes += Carbon::parse($slotStart)->diffInMinutes(Carbon::parse($slotEnd));
+
+                if ($coveredMinutes >= $requiredMinutes) {
+                    return $selectedSlots;
+                }
+
+                $expectedStartTime = $slotEnd;
+            }
+        }
+
+        return collect();
+    }
+}

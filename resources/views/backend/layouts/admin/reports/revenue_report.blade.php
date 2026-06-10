@@ -1,15 +1,15 @@
 @extends('backend.app')
-@section('title', 'Revenue Report')
+@section('title', __('admin.revenue_report'))
 @section('content')
 <!-- start page title -->
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">Revenue Report</h4>
+            <h4 class="mb-sm-0">{{ __('admin.revenue_report') }}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Reports</a></li>
-                    <li class="breadcrumb-item active">Revenue</li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">{{ __('admin.reports') }}</a></li>
+                    <li class="breadcrumb-item active">{{ __('admin.revenue') }}</li>
                 </ol>
             </div>
         </div>
@@ -23,7 +23,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total Revenue (Gross)</p>
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">{{ __('admin.total_revenue_gross') }}</p>
                     </div>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
@@ -45,7 +45,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Admin Commission (Net)</p>
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">{{ __('admin.admin_commission_net') }}</p>
                     </div>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
@@ -67,7 +67,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1 overflow-hidden">
-                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Provider Payouts</p>
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">{{ __('admin.provider_payouts') }}</p>
                     </div>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
@@ -89,12 +89,12 @@
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Revenue Performance</h4>
+                <h4 class="card-title mb-0 flex-grow-1">{{ __('admin.revenue_performance') }}</h4>
                 <div class="flex-shrink-0">
                     <form action="{{ route('admin.reports.revenue') }}" method="GET" class="d-flex gap-2">
                         <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate->format('Y-m-d') }}">
                         <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $endDate->format('Y-m-d') }}">
-                        <button type="submit" class="btn btn-soft-primary btn-sm">Filter</button>
+                        <button type="submit" class="btn btn-soft-primary btn-sm">{{ __('admin.filter') }}</button>
                     </form>
                 </div>
             </div>

@@ -64,24 +64,24 @@
             <div class="col-md-12">
                 <div class="card dynamic-create-card">
                     <div class="dynamic-create-header">
-                        <h4>Create Dynamic Content</h4>
+                        <h4>{{ __('admin.create_dynamic_content') }}</h4>
                     </div>
                     <div class="dynamic-create-body">
                         <form action="{{ route('admin.dynamic.store') }}" method="POST">
                             @csrf
                             <div class="mb-3">
-                                <label for="title" class="form-label">Title</label>
-                                <input type="text" name="title" class="form-control" id="title" placeholder="Enter title">
+                                <label for="title" class="form-label">{{ __('admin.title') }}</label>
+                                <input type="text" name="title" class="form-control" id="title" placeholder="{{ __('admin.enter_title') }}">
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea name="description" class="form-control summernote" id="description" placeholder="Enter description"></textarea>
+                                <label for="description" class="form-label">{{ __('admin.description') }}</label>
+                                <textarea name="description" class="form-control summernote" id="description" placeholder="{{ __('admin.enter_description') }}"></textarea>
                             </div>
 
                             <div class="dynamic-create-actions">
-                                <a href="{{ route('admin.dynamic.index') }}" class="btn btn-light">Cancel</a>
-                                <button type="submit" class="btn btn-primary px-4">Submit</button>
+                                <a href="{{ route('admin.dynamic.index') }}" class="btn btn-light">{{ __('admin.cancel') }}</a>
+                                <button type="submit" class="btn btn-primary px-4">{{ __('admin.submit') }}</button>
                             </div>
                         </form>
                     </div>
@@ -97,7 +97,7 @@
         $(document).ready(function() {
             $('.summernote').summernote({
                 height: 220,
-                placeholder: 'Enter description',
+                placeholder: @json(__('admin.enter_description')),
                 toolbar: [
                     ['style', ['style']],
                     ['font', ['bold', 'underline', 'italic', 'clear']],
@@ -123,4 +123,3 @@
         });
     </script>
 @endpush
-

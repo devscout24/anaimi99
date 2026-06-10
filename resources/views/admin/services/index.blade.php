@@ -13,7 +13,7 @@
         <div class="col-12 col-lg-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Service List</h5>
+                    <h5 class="mb-0">{{ __('admin.service_list') }}</h5>
                 </div>
 
                 <div class="card-body">
@@ -22,8 +22,8 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Service Name</th>
-                                    <th>Action</th>
+                                    <th>{{ __('admin.service_name') }}</th>
+                                    <th>{{ __('admin.action') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -35,7 +35,7 @@
         <div class="col-12 col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0" id="form-title">Add Service</h5>
+                    <h5 class="mb-0" id="form-title">{{ __('admin.add_service') }}</h5>
                 </div>
 
                 <div class="card-body">
@@ -46,13 +46,13 @@
                         <input type="hidden" id="id">
 
                         <div class="mb-3">
-                            <label for="service_name" class="form-label">Service Name</label>
+                            <label for="service_name" class="form-label">{{ __('admin.service_name') }}</label>
                             <input type="text" id="service_name" class="form-control" autocomplete="off">
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary" id="submitBtn" type="submit">Save</button>
-                            <button class="btn btn-light d-none" id="cancelBtn" type="button">Cancel</button>
+                            <button class="btn btn-primary" id="submitBtn" type="submit">{{ __('admin.save') }}</button>
+                            <button class="btn btn-light d-none" id="cancelBtn" type="button">{{ __('admin.cancel') }}</button>
                         </div>
                     </form>
                 </div>
@@ -102,7 +102,7 @@ $(function () {
                 html += '<div>' + v[0] + '</div>';
             });
         } else {
-            html = '<div>Something went wrong</div>';
+            html = '<div>' + @json(__('admin.something_went_wrong')) + '</div>';
         }
 
         $('#error-box').removeClass('d-none').html(html);
@@ -111,8 +111,8 @@ $(function () {
     function resetForm() {
         $('#form')[0].reset();
         $('#id').val('');
-        $('#form-title').text('Add Service');
-        $('#submitBtn').text('Save');
+        $('#form-title').text(@json(__('admin.add_service')));
+        $('#submitBtn').text(@json(__('admin.save')));
         $('#cancelBtn').addClass('d-none');
         $('#error-box').addClass('d-none').html('');
     }
@@ -157,8 +157,8 @@ $(function () {
         $.get('/admin/services/edit/' + id, function (res) {
             $('#id').val(res.id);
             $('#service_name').val(res.service_name);
-            $('#form-title').text('Edit Service');
-            $('#submitBtn').text('Update');
+            $('#form-title').text(@json(__('admin.edit_service')));
+            $('#submitBtn').text(@json(__('admin.update')));
             $('#cancelBtn').removeClass('d-none');
             $('#error-box').addClass('d-none').html('');
         });
@@ -168,7 +168,7 @@ $(function () {
     $(document).on('click', '.js-delete', function () {
         let id = $(this).data('id');
 
-        if (confirm('Delete this service?')) {
+        if (confirm(@json(__('admin.delete_service_confirm')))) {
             $.ajax({
                 url: '/admin/services/destroy/' + id,
                 method: 'DELETE',

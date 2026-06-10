@@ -13,8 +13,9 @@ use App\Http\Controllers\API\CustomerBookingController;
 use App\Http\Controllers\API\CustomerReservationController;
 use App\Http\Controllers\API\CustomerReviewRatingController;
 use App\Http\Controllers\API\HelpandSupportController;
-use App\Http\Controllers\API\InvoiceController;
+use App\Http\Controllers\API\HomeBarberController;
 
+use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\Loyality;
 use App\Http\Controllers\API\LoyalityBookingController;
 use App\Http\Controllers\API\ProfileController;
@@ -28,10 +29,11 @@ use App\Http\Controllers\API\SalonOrBarberController;
 use App\Http\Controllers\API\SalonPriceSetcontroller;
 use App\Http\Controllers\API\SalonProfileController;
 use App\Http\Controllers\API\SalonServiceController;
-use App\Http\Controllers\API\ScheduleController;
 
+use App\Http\Controllers\API\ScheduleController;
 use App\Http\Controllers\API\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -95,6 +97,7 @@ Route::middleware(['auth:api', 'check.approval'])->group(function () {
 
         Route::get('barber/home/dashboard', 'dashboard');
         Route::get('barber/home/booking/history', 'bookingHistory');
+        Route::get('barber/booking/payment/status/{id}', 'bookingPaymentStatus');
     });
 
     Route::controller(BookingStatusManageController::class)->group(function () {
@@ -185,6 +188,8 @@ Route::middleware(['auth:api', 'check.approval'])->group(function () {
     });
 
 
+
+
     Route::controller(Loyality::class)->group(function () {
 
         Route::get('loyalty/point/get/history', 'getLoyalityHistory');
@@ -245,6 +250,13 @@ Route::middleware(['auth:api', 'check.approval'])->group(function () {
         Route::get('customer/review/rating/{id}', 'customerReviewRatingDetails');
         Route::post('customer/review/rating/{id}', 'customerReviewRatingUpdate');
     });
+
+
+    Route::controller(HomeBarberController::class)->group(function(){
+        Route::post('home/barber/search/list', 'homeBarberSearchList');
+    });
+
+
 
     Route::controller(SalonInvoiceController::class)->group(function () {
         Route::get('salon/invoices', 'index');

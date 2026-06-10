@@ -8,6 +8,7 @@ use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BarberBookingController extends Controller
 {
@@ -24,17 +25,15 @@ class BarberBookingController extends Controller
 
             $bookings = Booking::with(['customer', 'slots.scheduleTime', 'items.service'])
                 ->where('barber_id', $user->id)
-                ->where('booking_date', $date)
+                ->where('booking_date', $date);
+
+            $this->hideExpiredAsapRequests($bookings, $user->id);
+
+            $bookings = $bookings
                 ->get();
 
             $formattedBookings = $bookings->map(function ($booking) {
-                // Sort slots by start time
-                $sortedSlots = $booking->slots->sortBy(function ($slot) {
-                    return $slot->scheduleTime->scheduled_start_time;
-                });
-
-                $startTime = $sortedSlots->first() ? Carbon::parse($sortedSlots->first()->scheduleTime->scheduled_start_time)->format('H:i') : null;
-                $endTime = $sortedSlots->last() ? Carbon::parse($sortedSlots->last()->scheduleTime->scheduled_end_time)->format('H:i') : null;
+                [$startTime, $endTime] = $this->getBookingTimeRange($booking, 'H:i');
 
                 // Join service names
                 $serviceNames = $booking->items->map(function ($item) {
@@ -44,12 +43,15 @@ class BarberBookingController extends Controller
                 return [
                     'id' => $booking->id,
                     'customer_name' => $booking->customer->name ?? 'Unknown',
-                    'customer_image' => $booking->customer->profile_image ?? null,
+                    'customer_image' => $booking->customer?->profile_image
+                                        ? asset($booking->customer->profile_image)
+                                        : null,
                     'start_time' => $startTime,
                     'end_time' => $endTime,
                     'services' => $serviceNames,
                     'status' => $booking->status,
                     'booking_type' => $booking->booking_type,
+                    'payment_status'=>$booking->payment_status??null,
                     'total_price' => $booking->total_price,
                 ];
             });
@@ -71,23 +73,18 @@ class BarberBookingController extends Controller
 
             $booking = Booking::with(['customer.provider_profiles', 'slots.scheduleTime', 'items.service'])
                 ->where('barber_id', $user->id)
-                ->where('id', $id)
+                ->where('id', $id);
+
+            $this->hideExpiredAsapRequests($booking, $user->id);
+
+            $booking = $booking
                 ->first();
 
             if (!$booking) {
                 return $this->notFound([], 'Booking not found.');
             }
 
-            // Sort slots
-            $sortedSlots = $booking->slots->sortBy(function ($slot) {
-                return $slot->scheduleTime->scheduled_start_time;
-            });
-
-            $firstSlot = $sortedSlots->first();
-            $lastSlot = $sortedSlots->last();
-
-            $startTime = $firstSlot ? Carbon::parse($firstSlot->scheduleTime->scheduled_start_time) : null;
-            $endTime = $lastSlot ? Carbon::parse($lastSlot->scheduleTime->scheduled_end_time) : null;
+            [$startTime, $endTime] = $this->getBookingTimeRange($booking);
 
             $duration = 0;
             if ($startTime && $endTime) {
@@ -107,12 +104,14 @@ class BarberBookingController extends Controller
                 'formatted_date' => Carbon::parse($booking->booking_date)->format('l, F j, Y'),
                 'formatted_time' => $startTime ? $startTime->format('g:i A') : null,
                 'duration_text' => $duration . ' minutes',
-                'client' => [
-                    'id' => $booking->customer->id ?? null,
-                    'name' => $booking->customer->name ?? 'Unknown',
-                    'phone' => $booking->customer->phone ?? null,
-                    'image' => $booking->customer->profile_image ?? null,
-                ],
+               'client' => [
+                            'id' => $booking->customer?->id,
+                            'name' => $booking->customer?->name ?? 'Unknown',
+                            'phone' => $booking->customer?->phone,
+                            'image' => $booking->customer?->profile_image
+                                ? asset($booking->customer->profile_image)
+                                : null,
+                        ],
                 'location' => [
                     'address' => $booking->customer->provider_profiles->salon_address ?? 'Address not specified',
                     'latitude' => $booking->latitude ?? $booking->customer->latitude,
@@ -165,51 +164,23 @@ class BarberBookingController extends Controller
                 ->get();
 
             $nextBooking = $bookings->filter(function ($booking) use ($now) {
-                $sortedSlots = $booking->slots->sortBy(function ($slot) {
-                    return optional($slot->scheduleTime)->scheduled_start_time;
-                });
-                $firstSlot = $sortedSlots->first();
-                if (!$firstSlot || !$firstSlot->scheduleTime) return false;
-
-                $startTimeStr = $firstSlot->scheduleTime->scheduled_start_time;
-                // Ensure it's a string for parsing if it's a Carbon instance
-                $startTimeStr = ($startTimeStr instanceof Carbon) ? $startTimeStr->format('H:i:s') : $startTimeStr;
+                [$startTime,] = $this->getBookingTimeRange($booking);
+                if (!$startTime) return false;
 
                 $bookingDate = Carbon::parse($booking->booking_date)->format('Y-m-d');
-                $bookingDateTime = Carbon::parse($bookingDate . ' ' . $startTimeStr);
+                $bookingDateTime = Carbon::parse($bookingDate . ' ' . $startTime->format('H:i:s'));
 
                 return $bookingDateTime->isAfter($now);
             })->sortBy(function ($booking) {
-                $sortedSlots = $booking->slots->sortBy(function ($slot) {
-                    return optional($slot->scheduleTime)->scheduled_start_time;
-                });
-                $firstSlot = $sortedSlots->first();
-                $startTimeStr = $firstSlot && $firstSlot->scheduleTime ? $firstSlot->scheduleTime->scheduled_start_time : '00:00:00';
-                $startTimeStr = ($startTimeStr instanceof Carbon) ? $startTimeStr->format('H:i:s') : $startTimeStr;
+                [$startTime,] = $this->getBookingTimeRange($booking);
+                $startTimeStr = $startTime ? $startTime->format('H:i:s') : '00:00:00';
 
                 return Carbon::parse($booking->booking_date)->format('Y-m-d') . ' ' . $startTimeStr;
             })->first();
 
             $nextAppointmentData = null;
             if ($nextBooking) {
-                $sortedSlots = $nextBooking->slots->sortBy(function ($slot) {
-                    return optional($slot->scheduleTime)->scheduled_start_time;
-                });
-                $firstSlot = $sortedSlots->first();
-                $lastSlot = $sortedSlots->last();
-
-                $startTime = null;
-                $endTime = null;
-
-                if ($firstSlot && $firstSlot->scheduleTime) {
-                    $st = $firstSlot->scheduleTime->scheduled_start_time;
-                    $startTime = Carbon::parse($st)->format('g:i A');
-                }
-
-                if ($lastSlot && $lastSlot->scheduleTime) {
-                    $et = $lastSlot->scheduleTime->scheduled_end_time;
-                    $endTime = Carbon::parse($et)->format('g:i A');
-                }
+                [$startTime, $endTime] = $this->getBookingTimeRange($nextBooking, 'g:i A');
 
                 $nextAppointmentData = [
                     'id' => $nextBooking->id,
@@ -222,12 +193,19 @@ class BarberBookingController extends Controller
                 ];
             }
 
-            // 3. New Requests (ASAP search_barber or pending)
+            // 3. New Requests (live ASAP requests and other pending bookings)
             $newRequests = Booking::with(['customer', 'items.service'])
                 ->where('barber_id', $user->id)
-                ->whereIn('status', ['search_barber', 'pending'])
+                ->whereIn('status', ['search_barber', 'pending']);
+
+            $this->hideExpiredAsapRequests($newRequests, $user->id);
+
+            $newRequests = $newRequests
                 ->get()
                 ->map(function ($booking) {
+                    $canUseActions = $booking->status === 'pending'
+                        || ($booking->booking_type === 'as_soon_possible' && $booking->status === 'search_barber');
+
                     $serviceNames = $booking->items->map(function ($item) {
                         return optional($item->service)->service_name ?? 'Unknown';
                     })->implode(' + ');
@@ -237,14 +215,19 @@ class BarberBookingController extends Controller
                         'customer_name' => $booking->customer->name ?? 'Unknown',
                         'customer_image' => $booking->customer->profile_image ? asset($booking->customer->profile_image) : null,
                         'services' => $serviceNames,
-                        'location' => 'At home', // Default to at home as per design
+                        'cust_lat' => $booking->customer->latitude ?? null,
+                        'cust_lng' => $booking->customer->longitude ?? null,
                         'time' => Carbon::parse($booking->created_at)->format('g:i A'),
                         'date' => Carbon::parse($booking->booking_date)->format('M d, Y'),
+                        'status' => $booking->status,
+                        'booking_type' => $booking->booking_type,
+                        'can_accept' => $canUseActions,
+                        'can_reject' => $canUseActions,
                     ];
                 });
 
             $data = [
-                'hello_message' => "Hello, " . explode(' ', $user->name)[0] . "!",
+                'hello_message' => "Bonjour, " . explode(' ', $user->name)[0] . "!",
                 'profile_image' => $user->profile_image ? asset($user->profile_image) : null,
                 'availability' => (bool) ($user->availability ?? optional($user->provider_profiles)->available ?? false),
                 'summary' => [
@@ -310,21 +293,7 @@ class BarberBookingController extends Controller
             }
 
             $formattedHistory = collect($items)->map(function ($booking) {
-                // Sort slots
-                $sortedSlots = $booking->slots->sortBy(function ($slot) {
-                    return optional($slot->scheduleTime)->scheduled_start_time;
-                });
-
-                $startTime = null;
-                $endTime = null;
-
-                if ($sortedSlots->first() && $sortedSlots->first()->scheduleTime) {
-                    $startTime = Carbon::parse($sortedSlots->first()->scheduleTime->scheduled_start_time)->format('g:i A');
-                }
-
-                if ($sortedSlots->last() && $sortedSlots->last()->scheduleTime) {
-                    $endTime = Carbon::parse($sortedSlots->last()->scheduleTime->scheduled_end_time)->format('g:i A');
-                }
+                [$startTime, $endTime] = $this->getBookingTimeRange($booking, 'g:i A');
 
                 $serviceNames = $booking->items->map(function ($item) {
                     return optional($item->service)->service_name ?? 'Unknown';
@@ -371,5 +340,84 @@ class BarberBookingController extends Controller
         }
     }
 
-}
+    private function hideExpiredAsapRequests($query, int $barberId): void
+    {
+        $expiredAt = Carbon::now()->subMinutes(3);
 
+        $query->where(function ($q) use ($expiredAt, $barberId) {
+            $q->where('booking_type', '!=', 'as_soon_possible')
+                ->orWhereNotIn('status', ['search_barber', 'pending'])
+                ->orWhere('last_assigned_at', '>', $expiredAt)
+                ->orWhereNotExists(function ($assignment) use ($barberId) {
+                    $assignment->select(DB::raw(1))
+                        ->from('booking_assign_histories')
+                        ->whereColumn('booking_assign_histories.booking_id', 'bookings.id')
+                        ->where('booking_assign_histories.barber_id', $barberId)
+                        ->where('booking_assign_histories.status', 'pending');
+                });
+        });
+    }
+
+    private function getBookingTimeRange(Booking $booking, ?string $format = null): array
+    {
+        $sortedSlots = $booking->slots->sortBy(function ($slot) {
+            return $this->getSlotStartTime($slot)?->format('H:i:s') ?? '99:99:99';
+        });
+
+        $startTime = $this->getSlotStartTime($sortedSlots->first());
+        $endTime = $this->getSlotEndTime($sortedSlots->last());
+
+        if (!$format) {
+            return [$startTime, $endTime];
+        }
+
+        return [
+            $startTime ? $startTime->format($format) : null,
+            $endTime ? $endTime->format($format) : null,
+        ];
+    }
+
+    private function getSlotStartTime($slot): ?Carbon
+    {
+        if (!$slot) {
+            return null;
+        }
+
+        $time = optional($slot->scheduleTime)->scheduled_start_time ?? $slot->start_time;
+
+        return $time ? Carbon::parse($time) : null;
+    }
+
+    private function getSlotEndTime($slot): ?Carbon
+    {
+        if (!$slot) {
+            return null;
+        }
+
+        $time = optional($slot->scheduleTime)->scheduled_end_time ?? $slot->end_time;
+
+        return $time ? Carbon::parse($time) : null;
+    }
+
+
+    public function bookingPaymentStatus($id)
+    {
+        try {
+            $user = Auth::guard("api")->user();
+
+            $booking = Booking::where('customer_id', $user->id)
+                ->where('id', $id)
+                ->first();
+
+            if (!$booking) {
+                return $this->notFound([], 'Booking not found.');
+            }
+
+            return $this->success(['payment_status' => $booking->payment_status], 'Payment status fetched successfully.');
+
+        } catch (\Throwable $th) {
+            return $this->error('Something went wrong', $th->getMessage());
+        }
+    }
+
+}

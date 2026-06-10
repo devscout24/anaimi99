@@ -1,8 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\FcmTokenController;
 use App\Http\Controllers\API\ReviewController;
+
+Broadcast::routes(['middleware' => ['api', 'auth:api']]);
 
 
 
@@ -31,10 +35,12 @@ Route::middleware(['auth:api', 'check.approval'])->group(function () {
         Route::post('/change/password', 'changePassword');
 
         Route::post('/delete/account', 'deleteAccount');
-        Route::post('/fcm/token', 'fcmToken');
         Route::post('/user/profile/get', 'userProfileGet');
         Route::post('/user/profile/update', 'userProfileUpdate');
     });
+
+    Route::post('/fcm/token', [FcmTokenController::class, 'store']);
+    Route::post('/fcm/token/delete', [FcmTokenController::class, 'destroy']);
 });
 require __DIR__ . '/Shahin.php';
 

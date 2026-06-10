@@ -12,6 +12,7 @@ use App\Models\ScheduleTimeManage;
 use App\Models\ServicePrice;
 use App\Models\SlotBlockBarber;
 use App\Models\User;
+use App\Services\FcmService;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class CustomerBookingController extends Controller
     public function bookingslotscustomer(Request $request)
     {
 
-     
+
 
         $validator = Validator::make($request->all(), [
 
@@ -61,9 +62,9 @@ class CustomerBookingController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->error(
-                'Validation Error',
-                $validator->errors()
+            return $this->success(
+                $validator->errors(),
+                'Validation Error'
             );
         }
 
@@ -74,7 +75,8 @@ class CustomerBookingController extends Controller
             count($request->service_id) != count($request->price) ||
             count($request->service_id) != count($request->quantity)
         ) {
-            return $this->error(
+            return $this->success(
+                [],
                 'Service, quantity, and price count mismatch'
             );
         }
@@ -164,10 +166,10 @@ class CustomerBookingController extends Controller
                 }
 
                 $salonBlocked =
-                SlotBlockBarber::where(
-                    'salon_id',
-                    $salonId
-                )
+                    SlotBlockBarber::where(
+                        'salon_id',
+                        $salonId
+                    )
                     ->whereDate(
                         'block_date',
                         $date
@@ -192,10 +194,10 @@ class CustomerBookingController extends Controller
                 }
 
                 $blockedBarbers =
-                SlotBlockBarber::where(
-                    'salon_id',
-                    $salonId
-                )
+                    SlotBlockBarber::where(
+                        'salon_id',
+                        $salonId
+                    )
                     ->whereNotNull(
                         'barber_id'
                     )
@@ -217,10 +219,10 @@ class CustomerBookingController extends Controller
                     ->toArray();
 
                 $bookedBarbers =
-                BookingTimeMange::where(
-                    'salon_id',
-                    $salonId
-                )
+                    BookingTimeMange::where(
+                        'salon_id',
+                        $salonId
+                    )
                     ->whereDate(
                         'date',
                         $date
@@ -242,18 +244,27 @@ class CustomerBookingController extends Controller
                     ->toArray();
 
                 $unavailable =
-                array_unique(
-                    array_merge(
-                        $blockedBarbers,
-                        $bookedBarbers
-                    )
-                );
+                    array_unique(
+                        array_merge(
+                            $blockedBarbers,
+                            $bookedBarbers
+                        )
+                    );
+
+                // Check if the salon has any barbers at all
+                $hasBarbers = User::where('salon_id', $salonId)->exists();
+                if (!$hasBarbers) {
+                    return $this->success(
+                        [],
+                        'This salon currently has no barbers registered.'
+                    );
+                }
 
                 $freeBarber =
-                User::where(
-                    'salon_id',
-                    $salonId
-                )
+                    User::where(
+                        'salon_id',
+                        $salonId
+                    )
                     ->whereNotIn(
                         'id',
                         $unavailable
@@ -262,14 +273,14 @@ class CustomerBookingController extends Controller
                     ->first();
 
                 if (! $freeBarber) {
-                    throw new \Exception(
-                        'No barber available.'
+                    return $this->success(
+                        [],
+                        'Sorry, no free barber is available for this slot. Please try another time or select a specific barber.'
                     );
                 }
 
                 $assignedBarberId =
-                $freeBarber->id;
-
+                    $freeBarber->id;
             }
 
             /*
@@ -285,10 +296,10 @@ class CustomerBookingController extends Controller
             ) {
 
                 $salonId =
-                $request->salon_id;
+                    $request->salon_id;
 
                 $barberId =
-                $request->barber_id;
+                    $request->barber_id;
 
                 if (
                     ! $salonId
@@ -305,10 +316,10 @@ class CustomerBookingController extends Controller
                 */
 
                 $barber =
-                User::where(
-                    'id',
-                    $barberId
-                )
+                    User::where(
+                        'id',
+                        $barberId
+                    )
                     ->where(
                         'salon_id',
                         $salonId
@@ -327,10 +338,10 @@ class CustomerBookingController extends Controller
                 */
 
                 $salonBlocked =
-                SlotBlockBarber::where(
-                    'salon_id',
-                    $salonId
-                )
+                    SlotBlockBarber::where(
+                        'salon_id',
+                        $salonId
+                    )
                     ->whereDate(
                         'block_date',
                         $date
@@ -359,10 +370,10 @@ class CustomerBookingController extends Controller
                 */
 
                 $barberBlocked =
-                SlotBlockBarber::where(
-                    'salon_id',
-                    $salonId
-                )
+                    SlotBlockBarber::where(
+                        'salon_id',
+                        $salonId
+                    )
                     ->where(
                         'barber_id',
                         $barberId
@@ -392,10 +403,10 @@ class CustomerBookingController extends Controller
                 */
 
                 $alreadyBooked =
-                BookingTimeMange::where(
-                    'barber_id',
-                    $barberId
-                )
+                    BookingTimeMange::where(
+                        'barber_id',
+                        $barberId
+                    )
                     ->whereDate(
                         'date',
                         $date
@@ -417,8 +428,7 @@ class CustomerBookingController extends Controller
                 }
 
                 $assignedBarberId =
-                $barberId;
-
+                    $barberId;
             }
 
             /*
@@ -434,7 +444,7 @@ class CustomerBookingController extends Controller
             ) {
 
                 $barberId =
-                $request->barber_id;
+                    $request->barber_id;
 
                 if (
                     ! $barberId
@@ -449,10 +459,10 @@ class CustomerBookingController extends Controller
                 */
 
                 $barberBlocked =
-                SlotBlockBarber::where(
-                    'barber_id',
-                    $barberId
-                )
+                    SlotBlockBarber::where(
+                        'barber_id',
+                        $barberId
+                    )
                     ->whereDate(
                         'block_date',
                         $date
@@ -478,10 +488,10 @@ class CustomerBookingController extends Controller
                 */
 
                 $alreadyBooked =
-                BookingTimeMange::where(
-                    'barber_id',
-                    $barberId
-                )
+                    BookingTimeMange::where(
+                        'barber_id',
+                        $barberId
+                    )
                     ->whereDate(
                         'date',
                         $date
@@ -503,8 +513,7 @@ class CustomerBookingController extends Controller
                 }
 
                 $assignedBarberId =
-                $barberId;
-
+                    $barberId;
             }
 
             /*
@@ -523,53 +532,53 @@ class CustomerBookingController extends Controller
             ) {
 
                 $booking =
-                new Booking;
+                    new Booking;
 
                 $booking->customer_id =
-                $request->customer_id;
+                    $request->customer_id;
 
                 $booking->barber_id =
-                $assignedBarberId;
+                    $assignedBarberId;
 
                 $booking->salon_id =
-                $request->salon_id;
+                    $request->salon_id;
 
                 $booking->subtotal =
-                $request->subtotal
-                ??
-                array_sum(
-                    $request->price
-                );
+                    $request->subtotal
+                    ??
+                    array_sum(
+                        $request->price
+                    );
 
                 $booking->tax =
-                $request->tax ?? 0;
+                    $request->tax ?? 0;
 
                 $booking->total_price =
-                $request->total_price
-                ??
-                array_sum(
-                    $request->price
-                );
+                    $request->total_price
+                    ??
+                    array_sum(
+                        $request->price
+                    );
 
                 $booking->total_service_quantity =
-                count(
-                    $request->service_id
-                );
+                    count(
+                        $request->service_id
+                    );
 
                 $booking->payment_type =
-                $request->payment_type;
+                    $request->payment_type;
 
                 $booking->booking_type =
-                $request->request_type;
+                    $request->request_type;
 
                 $booking->payment_status =
-                'pending';
+                    'pending';
 
                 $booking->status =
-                'accepted';
+                    'pending';
 
                 $booking->booking_date =
-                $date;
+                    $date;
 
                 /*
                 commission calculation
@@ -594,9 +603,9 @@ class CustomerBookingController extends Controller
                 ) {
 
                     $slotInfo =
-                    ScheduleTimeManage::find(
-                        $slotId
-                    );
+                        ScheduleTimeManage::find(
+                            $slotId
+                        );
 
                     BookingTimeMange::create([
 
@@ -611,19 +620,18 @@ class CustomerBookingController extends Controller
                         'date' => $date,
 
                         'start_time' => $slotInfo
-                        ?
-                        $slotInfo->scheduled_start_time
-                        : null,
+                            ?
+                            $slotInfo->scheduled_start_time
+                            : null,
 
                         'end_time' => $slotInfo
-                        ?
-                        $slotInfo->scheduled_end_time
-                        : null,
+                            ?
+                            $slotInfo->scheduled_end_time
+                            : null,
 
-                        'status' => 'active',
+                        'status' => $request->payment_type === 'online' ? 'pending' : 'active',
 
                     ]);
-
                 }
 
                 /*
@@ -635,12 +643,12 @@ class CustomerBookingController extends Controller
                 ) {
 
                     $itemPrice =
-                    $request->price[$index]
-                    ?? 0;
+                        $request->price[$index]
+                        ?? 0;
 
                     $itemQuantity =
-                    $request->quantity[$index]
-                    ?? 1;
+                        $request->quantity[$index]
+                        ?? 1;
 
                     BookingItemManage::create([
 
@@ -655,7 +663,6 @@ class CustomerBookingController extends Controller
                         'total' => ($itemPrice * $itemQuantity),
 
                     ]);
-
                 }
 
                 /*
@@ -674,15 +681,13 @@ class CustomerBookingController extends Controller
                     'booking_type' => $booking->booking_type,
                     'payment_status' => 'pending',
                 ]);
-
             }
 
             DB::commit();
 
             if ($request->payment_type == 'online') {
                 Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
-
-                $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+                $baseUrl = config('app.url');
 
                 // Fetch service details for Stripe line items
                 $lineItems = [];
@@ -692,11 +697,14 @@ class CustomerBookingController extends Controller
 
                     $unitAmount = intval(round((float) $itemPrice * 100));
 
+                    $service = \App\Models\Service::find($serviceId);
+                    $serviceName = $service ? $service->service_name : 'Unknown Service';
+
                     $lineItems[] = [
                         'price_data' => [
                             'currency' => 'usd',
                             'product_data' => [
-                                'name' => 'Service ID: '.$serviceId,
+                                'name' => $serviceName . ' (ID: ' . $serviceId . ')',
                             ],
                             'unit_amount' => $unitAmount,
                         ],
@@ -708,12 +716,20 @@ class CustomerBookingController extends Controller
                     'payment_method_types' => ['card'],
                     'line_items' => $lineItems,
                     'mode' => 'payment',
-                    'success_url' => $frontendUrl.'/payment/success?session_id={CHECKOUT_SESSION_ID}',
-                    'cancel_url' => $frontendUrl.'/payment/cancel',
+                    'success_url' => $baseUrl . '/payment/success?session_id={CHECKOUT_SESSION_ID}',
+                    'cancel_url' => $baseUrl . '/payment/cancel',
                     'client_reference_id' => $booking->id,
                 ]);
 
                 $paymentUrl = $stripeSession->url;
+
+                // Notify Barber about new pending booking (Online)
+                FcmService::sendNotification(
+                    $assignedBarberId,
+                    'New Booking Request',
+                    'You have a new booking request. Waiting for customer payment.',
+                    ['booking_id' => $booking->id]
+                );
 
                 return $this->success(
                     [
@@ -725,6 +741,14 @@ class CustomerBookingController extends Controller
                 );
             }
 
+            // Notify Barber about new booking (COD/Onsite)
+            FcmService::sendNotification(
+                $assignedBarberId,
+                'New Booking!',
+                'You have a new booking. Please check your schedule.',
+                ['booking_id' => $booking->id]
+            );
+
             return $this->success(
                 [
                     'assigned_barber_id' => $assignedBarberId,
@@ -733,17 +757,14 @@ class CustomerBookingController extends Controller
                 ],
                 'Booking created successfully'
             );
-
         } catch (\Exception $e) {
 
             DB::rollBack();
 
-            return $this->error(
+            return $this->success(
+                [],
                 $e->getMessage()
             );
-
         }
-
     }
 }
-

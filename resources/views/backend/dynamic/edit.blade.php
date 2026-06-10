@@ -65,27 +65,27 @@
                 <div class="card dynamic-create-card">
                     <div class="dynamic-create-header d-flex justify-content-between align-items-center gap-3">
                         <div>
-                            <h4>Edit Dynamic Content</h4>
+                            <h4>{{ __('admin.edit_dynamic_content') }}</h4>
                         </div>
-                        <a href="{{ route('admin.dynamic.index') }}" class="btn btn-light btn-sm">Back to list</a>
+                        <a href="{{ route('admin.dynamic.index') }}" class="btn btn-light btn-sm">{{ __('admin.back_to_list') }}</a>
                     </div>
                     <div class="dynamic-create-body">
                         <form action="{{ route('admin.dynamic.update', $dynamic->id) }}" method="POST">
                             @csrf
                             @method('PUT')
                             <div class="mb-3">
-                                <label for="title" class="form-label">Title</label>
-                                <input type="text" name="title" class="form-control" id="title" value="{{ old('title', $dynamic->title) }}" placeholder="Enter title">
+                                <label for="title" class="form-label">{{ __('admin.title') }}</label>
+                                <input type="text" name="title" class="form-control" id="title" value="{{ old('title', $dynamic->title) }}" placeholder="{{ __('admin.enter_title') }}">
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea name="description" class="form-control summernote" id="description" placeholder="Enter description">{{ old('description', $dynamic->description) }}</textarea>
+                                <label for="description" class="form-label">{{ __('admin.description') }}</label>
+                                <textarea name="description" class="form-control summernote" id="description" placeholder="{{ __('admin.enter_description') }}">{{ old('description', $dynamic->description) }}</textarea>
                             </div>
 
                             <div class="dynamic-create-actions">
-                                <a href="{{ route('admin.dynamic.index') }}" class="btn btn-light">Cancel</a>
-                                <button type="submit" class="btn btn-primary px-4">Update</button>
+                                <a href="{{ route('admin.dynamic.index') }}" class="btn btn-light">{{ __('admin.cancel') }}</a>
+                                <button type="submit" class="btn btn-primary px-4">{{ __('admin.update') }}</button>
                             </div>
                         </form>
                     </div>
@@ -101,7 +101,7 @@
         $(document).ready(function() {
             $('.summernote').summernote({
                 height: 220,
-                placeholder: 'Enter description',
+                placeholder: @json(__('admin.enter_description')),
                 toolbar: [
                     ['style', ['style']],
                     ['font', ['bold', 'underline', 'italic', 'clear']],

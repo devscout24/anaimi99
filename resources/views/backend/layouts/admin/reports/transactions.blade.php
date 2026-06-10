@@ -1,5 +1,5 @@
 @extends('backend.app')
-@section('title', 'Transactions')
+@section('title', __('admin.all_transactions'))
 
 @section('content')
 
@@ -13,33 +13,33 @@
 
                 <!-- Date Range -->
                 <div class="col-md-2">
-                    <label class="form-label fw-semibold">Date From</label>
+                    <label class="form-label fw-semibold">{{ __('admin.date_from') }}</label>
                     <input type="date" id="start_date" class="form-control shadow-sm">
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label fw-semibold">Date To</label>
+                    <label class="form-label fw-semibold">{{ __('admin.date_to') }}</label>
                     <input type="date" id="end_date" class="form-control shadow-sm">
                 </div>
 
                 <!-- Provider Type -->
                 <div class="col-md-2">
-                    <label class="form-label fw-semibold">Provider Type</label>
+                    <label class="form-label fw-semibold">{{ __('admin.provider_type') }}</label>
                     <select id="type" class="form-select shadow-sm">
-                        <option value="">All</option>
-                        <option value="salon">Salon</option>
-                        <option value="barber">Home Barber</option>
+                        <option value="">{{ __('admin.all') }}</option>
+                        <option value="salon">{{ __('admin.salon') }}</option>
+                        <option value="barber">{{ __('admin.home_barber') }}</option>
                     </select>
                 </div>
 
                 <!-- Status -->
                 <div class="col-md-2">
-                    <label class="form-label fw-semibold">Status</label>
+                    <label class="form-label fw-semibold">{{ __('admin.status') }}</label>
                     <select id="data" class="form-select shadow-sm">
-                        <option value="">All</option>
-                        <option value="paid">Paid</option>
-                        <option value="pending">Pending</option>
-                        <option value="failed">Failed</option>
+                        <option value="">{{ __('admin.all') }}</option>
+                        <option value="paid">{{ __('admin.paid') }}</option>
+                        <option value="pending">{{ __('admin.pending') }}</option>
+                        <option value="failed">{{ __('admin.failed') }}</option>
                     </select>
                 </div>
 
@@ -76,15 +76,15 @@
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Booking</th>
-                            <th>Customer</th>
-                            <th>Provider</th>
-                            <th>Amount</th>
-                            <th>Commission</th>
-                            <th>Earnings</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Date</th>
+                            <th>{{ __('admin.booking') }}</th>
+                            <th>{{ __('admin.customer') }}</th>
+                            <th>{{ __('admin.provider') }}</th>
+                            <th>{{ __('admin.amount') }}</th>
+                            <th>{{ __('admin.commission') }}</th>
+                            <th>{{ __('admin.earnings') }}</th>
+                            <th>{{ __('admin.type') }}</th>
+                            <th>{{ __('admin.status') }}</th>
+                            <th>{{ __('admin.date') }}</th>
                         </tr>
                     </thead>
 

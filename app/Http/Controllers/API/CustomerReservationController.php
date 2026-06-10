@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Payment;
+use App\Services\FcmService;
 use Stripe\Stripe;
 use Stripe\Refund;
 use Illuminate\Support\Facades\Validator;
@@ -31,7 +32,7 @@ class CustomerReservationController extends Controller
             if ($user->role !== "customer") {
                 return $this->error([], "Only customer can view reservations", 403);
             }
-            $query = Booking::with(['salon', 'items.service', 'slots.scheduleTime'])
+            $query = Booking::with(['barber', 'salon', 'items.service', 'slots.scheduleTime'])
                 ->where('customer_id', $user->id);
             if ($request->type == "upcoming") {
                 $query->whereIn('status', ['pending', 'confirmed', 'accepted'])
@@ -48,21 +49,24 @@ class CustomerReservationController extends Controller
 
                 $serviceNames = $booking->items->map(fn($i) => $i->service->service_name ?? '')->filter()->implode(' + ');
 
-                $startTimeSlot = $booking->slots->sortBy(function ($slot) {
-                    return optional($slot->scheduleTime)->scheduled_start_time;
-                })->first();
-
-                $formattedTime = '';
-                if ($startTimeSlot && $startTimeSlot->scheduleTime) {
-                    $formattedTime = Carbon::parse($startTimeSlot->scheduleTime->scheduled_start_time)->format('g:i A');
-                }
+                [$startTime, $endTime] = $this->getBookingTimeRange($booking, 'g:i A');
+                $formattedTime = $startTime && $endTime ? $startTime . ' - ' . $endTime : ($startTime ?? '');
+                $totalServicePrice = $booking->items->sum(fn($item) => (float) ($item->total ?? 0));
+                $avgRating = ReviewRating::where('barbar_id', $booking->barber_id)->avg('rating') ?: 0;
                 // Date formatting (e.g., "Thu, Oct 24")
                 $dateFormatted = Carbon::parse($booking->booking_date)->isToday() ? 'Today' : Carbon::parse($booking->booking_date)->format('D, M d');
                 return [
                     'id' => $booking->id,
                     'service_name' => $serviceNames ?: 'Service',
+                    'total_service_price' => number_format($totalServicePrice, 2, '.', ''),
                     'location_type' => $booking->salon_id ? 'At the salon' : 'At home',
                     'location_name' => $booking->salon->business_name ?? $booking->address ?? 'N/A',
+                    'barber_image' => $booking->barber?->profile_image ? asset($booking->barber->profile_image) : null,
+                    'average_rating' => number_format($avgRating, 1, '.', ''),
+                    'date' => Carbon::parse($booking->booking_date)->format('Y-m-d'),
+                    'slot_time' => $formattedTime,
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
                     'date_time' => $dateFormatted . ', ' . $formattedTime,
                     'status' => ucfirst($booking->status),
                     'can_track' => (!$booking->salon_id && $booking->status == 'confirmed'),
@@ -82,30 +86,33 @@ class CustomerReservationController extends Controller
             if ($user->role !== "customer") {
                 return $this->success([], "Only customer can view reservations", 422);
             }
-            $booking = Booking::with(['salon', 'items.service', 'slots.scheduleTime'])->where('id', $id)->first();
+            $booking = Booking::with(['barber', 'salon', 'items.service', 'slots.scheduleTime'])->where('id', $id)->first();
             if (!$booking) {
                 return $this->success([], "Booking not found", 422);
             }
 
             $serviceNames = $booking->items->map(fn($i) => $i->service->service_name ?? '')->filter()->implode(' + ');
 
-            $startTimeSlot = $booking->slots->sortBy(function ($slot) {
-                return optional($slot->scheduleTime)->scheduled_start_time;
-            })->first();
-
-            $formattedTime = '';
-            if ($startTimeSlot && $startTimeSlot->scheduleTime) {
-                $formattedTime = Carbon::parse($startTimeSlot->scheduleTime->scheduled_start_time)->format('g:i A');
-            }
+            [$startTime, $endTime] = $this->getBookingTimeRange($booking, 'g:i A');
+            $formattedTime = $startTime && $endTime ? $startTime . ' - ' . $endTime : ($startTime ?? '');
+            $totalServicePrice = $booking->items->sum(fn($item) => (float) ($item->total ?? 0));
+            $avgRating = ReviewRating::where('barbar_id', $booking->barber_id)->avg('rating') ?: 0;
             // Date formatting (e.g., "Thu, Oct 24")
             $dateFormatted = Carbon::parse($booking->booking_date)->isToday() ? 'Today' : Carbon::parse($booking->booking_date)->format('D, M d');
             return $this->success([
                 'id' => $booking->id,
                 'service_name' => $serviceNames ?: 'Service',
+                'total_service_price' => number_format($totalServicePrice, 2, '.', ''),
                 'location_type' => $booking->salon_id ? 'At the salon' : 'At home',
                 'location_name' => $booking->salon->business_name ?? $booking->address ?? 'N/A',
-                'location_lat' => $booking->salon?->latitude ?? $booking->barbar?->latitude,
-                'location_lon' => $booking->salon?->longitude ?? $booking->barbar?->longitude,
+                'location_lat' => $booking->salon?->latitude ?? $booking->barber?->latitude,
+                'location_lon' => $booking->salon?->longitude ?? $booking->barber?->longitude,
+                'barber_image' => $booking->barber?->profile_image ? asset($booking->barber->profile_image) : null,
+                'average_rating' => number_format($avgRating, 1, '.', ''),
+                'date' => Carbon::parse($booking->booking_date)->format('Y-m-d'),
+                'slot_time' => $formattedTime,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
                 'date_time' => $dateFormatted . ', ' . $formattedTime,
                 'salon_details' => $booking->salon ? [
                     'id' => $booking->salon->id,
@@ -118,6 +125,8 @@ class CustomerReservationController extends Controller
                 'barber_details' => $booking->barber ? [
                     'id' => $booking->barber->id,
                     'name' => $booking->barber->name,
+                    'image' => $booking->barber->profile_image ? asset($booking->barber->profile_image) : null,
+                    'average_rating' => number_format($avgRating, 1, '.', ''),
                     'latitude' => $booking->barber->latitude,
                     'longitude' => $booking->barber->longitude,
                 ] : null,
@@ -150,18 +159,18 @@ class CustomerReservationController extends Controller
 
             // Barber Info
             $barber = $booking->barber;
-            $avgRating = ReviewRating::where('barbar_id', $booking->barbar_id)->avg('rating') ?: 5.0;
+            $avgRating = ReviewRating::where('barbar_id', $booking->barber_id)->avg('rating') ?: 5.0;
             $barberInfo = [
                 'name' => $barber->name ?? 'N/A',
-                'image' => $barber->profile_image ? asset($barber->profile_image) : null,
+                'image' => $barber?->profile_image ? asset($barber->profile_image) : null,
                 'rating' => number_format($avgRating, 1),
                 'services' => $booking->items->map(fn($i) => $i->service->service_name ?? '')->filter()->implode(' + '),
             ];
 
             // Service Info
             $serviceNames = $booking->items->map(fn($i) => $i->service->service_name ?? '')->filter()->implode(' + ');
-            $startTimeSlot = $booking->slots->sortBy(fn($s) => optional($s->scheduleTime)->scheduled_start_time)->first();
-            $formattedTime = $startTimeSlot && $startTimeSlot->scheduleTime ? Carbon::parse($startTimeSlot->scheduleTime->scheduled_start_time)->format('g:i A') : '';
+            [$startTime, $endTime] = $this->getBookingTimeRange($booking, 'g:i A');
+            $formattedTime = $startTime && $endTime ? $startTime . ' - ' . $endTime : ($startTime ?? '');
             $dateFormatted = Carbon::parse($booking->booking_date)->isToday() ? 'Today' : Carbon::parse($booking->booking_date)->format('D, M d');
 
             // Tracking Steps
@@ -203,7 +212,12 @@ class CustomerReservationController extends Controller
                     'location_name' => $booking->salon->business_name ?? $booking->address ?? 'N/A',
                     'location_lat' => $booking->salon?->latitude ?? $barber?->latitude,
                     'location_lon' => $booking->salon?->longitude ?? $barber?->longitude,
+                    'date' => Carbon::parse($booking->booking_date)->format('Y-m-d'),
+                    'slot_time' => $formattedTime,
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
                     'date_time' => $dateFormatted . ', ' . $formattedTime,
+                    'total_service_price' => number_format($booking->items->sum(fn($item) => (float) ($item->total ?? 0)), 2, '.', ''),
                     'total_to_pay' => number_format($booking->total_price, 2) . ' €',
                     'status' => ucfirst($booking->status),
                 ],
@@ -298,9 +312,70 @@ class CustomerReservationController extends Controller
             $booking->status = 'cancelled';
             $booking->save();
 
+            // Notify Barber about cancellation
+            if ($booking->barber_id) {
+                FcmService::sendNotification(
+                    $booking->barber_id,
+                    'Booking Cancelled',
+                    'The customer has cancelled their booking.',
+                    ['booking_id' => $booking->id]
+                );
+            }
+
+            // Notify Salon if applicable
+            if ($booking->salon_id && $booking->salon_id != $booking->barber_id) {
+                FcmService::sendNotification(
+                    $booking->salon_id,
+                    'Booking Cancelled',
+                    'A booking for your salon has been cancelled by the customer.',
+                    ['booking_id' => $booking->id]
+                );
+            }
+
             return $this->success([], 'Booking cancelled successfully');
         } catch (Exception $e) {
             return $this->error($e->getMessage(), 500);
         }
+    }
+
+    private function getBookingTimeRange(Booking $booking, ?string $format = null): array
+    {
+        $sortedSlots = $booking->slots->sortBy(function ($slot) {
+            return $this->getSlotStartTime($slot)?->format('H:i:s') ?? '99:99:99';
+        });
+
+        $startTime = $this->getSlotStartTime($sortedSlots->first());
+        $endTime = $this->getSlotEndTime($sortedSlots->last());
+
+        if (!$format) {
+            return [$startTime, $endTime];
+        }
+
+        return [
+            $startTime ? $startTime->format($format) : null,
+            $endTime ? $endTime->format($format) : null,
+        ];
+    }
+
+    private function getSlotStartTime($slot): ?Carbon
+    {
+        if (!$slot) {
+            return null;
+        }
+
+        $time = optional($slot->scheduleTime)->scheduled_start_time ?? $slot->start_time;
+
+        return $time ? Carbon::parse($time) : null;
+    }
+
+    private function getSlotEndTime($slot): ?Carbon
+    {
+        if (!$slot) {
+            return null;
+        }
+
+        $time = optional($slot->scheduleTime)->scheduled_end_time ?? $slot->end_time;
+
+        return $time ? Carbon::parse($time) : null;
     }
 }

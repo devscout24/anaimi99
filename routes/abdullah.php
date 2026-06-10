@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:web', 'set.locale'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('services/index', [ServiceController::class, 'index'])->name('services.index');
     Route::post('services/store', [ServiceController::class, 'store'])->name('services.store');
@@ -26,7 +26,7 @@ Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function
 
 
 
-Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:web', 'set.locale'])->prefix('admin')->name('admin.')->group(function () {
     // availability days routes
     Route::get('availability-days', [AvaiabilityDayController::class, 'index'])->name('availability-days.index');
     Route::post('availability-days', [AvaiabilityDayController::class, 'store'])->name('availability-days.store');

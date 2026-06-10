@@ -1,56 +1,56 @@
 @extends('backend.app')
-@section('title', 'Provider Financial Reports')
+@section('title', __('admin.provider_financial_reports'))
 @section('content')
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Provider Reports (Earnings & Commission)</h4>
+                <h4 class="card-title mb-0 flex-grow-1">{{ __('admin.provider_reports_title') }}</h4>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label>Date Range</label>
+                        <label>{{ __('admin.date_range') }}</label>
                         <div class="input-group">
                             <input type="date" id="start_date" class="form-control">
                             <input type="date" id="end_date" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <label>Role</label>
+                        <label>{{ __('admin.role') }}</label>
                         <select id="role" class="form-control">
-                            <option value="">All</option>
-                            <option value="salon">Salon</option>
-                            <option value="home_barbar">Home Barber</option>
+                            <option value="">{{ __('admin.all') }}</option>
+                            <option value="salon">{{ __('admin.salon') }}</option>
+                            <option value="home_barbar">{{ __('admin.home_barber') }}</option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label>Status</label>
+                        <label>{{ __('admin.status') }}</label>
                         <select id="status_filter" class="form-control">
-                            <option value="paid">Paid (Default)</option>
-                            <option value="pending">Pending</option>
-                            <option value="">All</option>
+                            <option value="paid">{{ __('admin.paid_default') }}</option>
+                            <option value="pending">{{ __('admin.pending') }}</option>
+                            <option value="">{{ __('admin.all') }}</option>
                         </select>
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
-                        <button id="filterBtn" class="btn btn-primary w-100">Filter</button>
+                        <button id="filterBtn" class="btn btn-primary w-100">{{ __('admin.filter') }}</button>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered nowrap w-100" id="reportTable">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Online Pmt</th>
-                                <th>COD</th>
-                                <th>Onsite</th>
-                                <th>Custom</th>
-                                <th>Total Revenue</th>
-                                <th>Admin Comm.</th>
-                                <th>Net Earnings</th>
-                                <th>Action</th>
+                                <th>{{ __('admin.no') }}</th>
+                                <th>{{ __('admin.name') }}</th>
+                                <th>{{ __('admin.role') }}</th>
+                                <th>{{ __('admin.online_pmt') }}</th>
+                                <th>{{ __('admin.cod') }}</th>
+                                <th>{{ __('admin.onsite') }}</th>
+                                <th>{{ __('admin.custom') }}</th>
+                                <th>{{ __('admin.total_revenue') }}</th>
+                                <th>{{ __('admin.admin_commission_short') }}</th>
+                                <th>{{ __('admin.net_earnings') }}</th>
+                                <th>{{ __('admin.action') }}</th>
                             </tr>
                         </thead>
                     </table>

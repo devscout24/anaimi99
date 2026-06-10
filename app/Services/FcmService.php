@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 
 class FcmService
 {
@@ -12,51 +14,46 @@ class FcmService
      */
     public static function sendNotification($userId, $title, $body, $data = [])
     {
-        $user = User::find($userId);
-        if (!$user || !$user->fcm_token) {
+        $user = User::with('fcmTokens')->find($userId);
+        if (!$user) {
             return false;
         }
 
-        $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-        $serverKey = env('FCM_SERVER_KEY');
+        // Get all tokens from the new table
+        $tokens = $user->fcmTokens->pluck('token')->toArray();
 
-        if (!$serverKey) {
-            Log::error('FCM Server Key not found in .env');
+        // Fallback to old fcm_token column if no tokens in new table
+        if (empty($tokens) && $user->fcm_token) {
+            $tokens[] = $user->fcm_token;
+        }
+
+        if (empty($tokens)) {
             return false;
         }
 
-        $notification = [
-            'title' => $title,
-            'body' => $body,
-            'sound' => 'default',
-        ];
+        try {
+            $messaging = app('firebase.messaging');
 
-        $extraData = array_merge($data, [
-            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-        ]);
+            $notification = Notification::create($title, $body);
 
-        $fcmFields = [
-            'to' => $user->fcm_token,
-            'priority' => 'high',
-            'notification' => $notification,
-            'data' => $extraData,
-        ];
+            $message = CloudMessage::new()
+                ->withNotification($notification)
+                ->withData($data);
 
-        $headers = [
-            'Authorization: key=' . $serverKey,
-            'Content-Type: application/json',
-        ];
+            $report = $messaging->sendMulticast($message, $tokens);
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $fcmUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmFields));
-        $result = curl_exec($ch);
-        curl_close($ch);
+            if ($report->failures()->count() > 0) {
+                foreach ($report->failures()->getItems() as $failure) {
+                    Log::warning('FCM individual failure: ' . $failure->error()->getMessage());
+                }
+            }
 
-        return $result;
+            Log::info('FCM Send summary: Successful: ' . $report->successes()->count() . ', Failed: ' . $report->failures()->count());
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Firebase Messaging Error: ' . $e->getMessage());
+            return false;
+        }
     }
 }

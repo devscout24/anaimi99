@@ -96,6 +96,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(ProviderProfile::class, 'user_id');
     }
 
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
     public function imageGallery()
     {
         return $this->hasMany(ImageGallary::class, 'provider_profile_id');
@@ -223,5 +228,10 @@ class User extends Authenticatable implements JWTSubject
     public function reviewsAsBarber()
     {
         return $this->hasMany(ReviewRating::class, 'barbar_id');
+    }
+
+    public function schedule_time_manages()
+    {
+        return $this->hasMany(ScheduleTimeManage::class, 'provider_id');
     }
 }

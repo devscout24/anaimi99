@@ -17,7 +17,7 @@ use App\Http\Controllers\Backend\Setting\SystemSettingController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::middleware(['auth:web'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:web', 'set.locale'])->prefix('admin')->name('admin.')->group(function () {
 
     // Reports & Transactions
     Route::controller(ReportController::class)->prefix('reports')->name('reports.')->group(function () {

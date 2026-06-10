@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use App\Models\ChatGallery;
 use App\Models\User;
+use App\Services\FcmService;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -88,11 +89,19 @@ class ChatController extends Controller
 
             broadcast(new ChatEvent($chat))->toOthers();
 
-
-
+            // Send Push Notification via FcmService
+            FcmService::sendNotification(
+                $receiverId,
+                'New Message from ' . Auth::user()->name,
+                $request->message ?? 'Sent an image',
+                [
+                    'type' => 'chat',
+                    'sender_id' => Auth::id(),
+                    'conversation_id' => $conversationId
+                ]
+            );
 
             return $this->success($chat, 'Message sent successfully');
-
         } catch (\Exception $e) {
             Log::error('Chat send error: ' . $e->getMessage());
             return $this->error($e->getMessage(), [], 500);
@@ -123,7 +132,6 @@ class ChatController extends Controller
             });
 
             return $this->success($messages, 'Conversation retrieved successfully');
-
         } catch (\Exception $e) {
             Log::error('Get conversation error: ' . $e->getMessage());
             return $this->error($e->getMessage(), [], 500);
@@ -180,9 +188,9 @@ class ChatController extends Controller
         $authId = Auth::guard('api')->user()->id;
 
         $chats = Chat::where(function ($query) use ($authId) {
-                $query->where('sender_id', $authId)
-                      ->orWhere('receiver_id', $authId);
-            })
+            $query->where('sender_id', $authId)
+                ->orWhere('receiver_id', $authId);
+        })
             ->select('conversation_id', DB::raw('MAX(created_at) as latest_time'))
             ->groupBy('conversation_id')
             ->orderByDesc('latest_time')
@@ -200,7 +208,7 @@ class ChatController extends Controller
 
                 $otherUser = User::find($otherUserId);
 
-                $me=User::find($authId);
+                $me = User::find($authId);
 
                 $unreadCount = Chat::where('conversation_id', $chat->conversation_id)
                     ->where('receiver_id', $authId)
@@ -211,21 +219,21 @@ class ChatController extends Controller
                     'chat_id'         => $lastMessage->id ?? '',
                     'conversation_id' => $chat->conversation_id,
                     'latest_time'     => Carbon::parse($chat->latest_time)
-                                                ->timezone(config('app.timezone'))
-                                                ->format('Y-m-d H:i:s'),
+                        ->timezone(config('app.timezone'))
+                        ->format('Y-m-d H:i:s'),
                     'message'         => $lastMessage->message ?? '',
                     'user_name'       => $otherUser->name ?? '',
                     'receiver_id'     => $otherUserId,
                     'user_image'    => $otherUser && $otherUser->profile_image
-                                            ? asset($otherUser->profile_image)
-                                            : '',
+                        ? asset($otherUser->profile_image)
+                        : '',
 
                     'my_image'    => $me && $me->profile_image
-                                            ? asset($me->profile_image)
-                                            : '',
+                        ? asset($me->profile_image)
+                        : '',
                     'chat_image'      => $lastMessage && $lastMessage->chatimage
-                                            ? asset($lastMessage->chatimage->image)
-                                            : '',
+                        ? asset($lastMessage->chatimage->image)
+                        : '',
                     'image_id'        => $lastMessage->chatimage->id ?? '',
                     'unread_count'    => $unreadCount,
                 ];
@@ -263,4 +271,3 @@ class ChatController extends Controller
         }
     }
 }
-

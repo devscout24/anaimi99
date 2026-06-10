@@ -152,7 +152,10 @@ public function availableControll(Request $request)
     try {
 
         $user = Auth::guard('api')->user();
-        $salon_barber=User::where('id',$request->salon_barber_id)->whereIn('role',['salon_barber'])->first();
+        $salon_barber=User::query()->where('id',$request->salon_barber_id)->where('role','salon_barbar')->first();
+
+
+
         $profile = $user->provider_profiles;
 
 

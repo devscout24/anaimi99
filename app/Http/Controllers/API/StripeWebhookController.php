@@ -8,8 +8,10 @@ use Stripe\Stripe;
 use Stripe\Webhook;
 use App\Models\Payment;
 use App\Models\Booking;
+use App\Models\BookingTimeMange;
+use App\Services\FcmService;
 use Illuminate\Support\Facades\Log;
-use Api\Traits\ApiResponse;
+use App\Traits\ApiResponse;
 
 class StripeWebhookController extends Controller
 {
@@ -46,8 +48,22 @@ class StripeWebhookController extends Controller
                     $booking = Booking::find($bookingId);
                     if ($booking) {
                         $booking->payment_status = 'paid';
-                        $booking->status = 'confirmed';
+                        $booking->status = $booking->booking_type === 'as_soon_possible' ? 'confirmed' : 'pending';
                         $booking->save();
+
+                        BookingTimeMange::where('booking_id', $booking->id)
+                            ->where('status', 'pending')
+                            ->update(['status' => 'active']);
+
+                        // Notify Barber that payment is received
+                        if ($booking->barber_id) {
+                            FcmService::sendNotification(
+                                $booking->barber_id,
+                                'Payment Received',
+                                'Customer has paid for the ASAP booking. You can now proceed.',
+                                ['booking_id' => $booking->id]
+                            );
+                        }
 
                         // Update payments table if record exists
                         try {
@@ -76,4 +92,3 @@ class StripeWebhookController extends Controller
         return response()->json(['status' => 'success'], 200);
     }
 }
-

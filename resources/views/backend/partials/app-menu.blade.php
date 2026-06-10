@@ -40,21 +40,21 @@
                  <img class="rounded header-profile-user" src="{{ auth()->user()->avatar ? asset(auth()->user()->avatar) : asset('backend/assets/images/users/avatar-1.jpg') }}" alt="Header Avatar">
                  <span class="text-start">
                      <span class="d-block fw-medium sidebar-user-name-text">{{ auth()->user()->name }}</span>
-                     <span class="d-block fs-14 sidebar-user-name-sub-text"><i class="align-baseline ri ri-circle-fill fs-10 text-success"></i> <span class="align-middle">Online</span></span>
+                     <span class="d-block fs-14 sidebar-user-name-sub-text"><i class="align-baseline ri ri-circle-fill fs-10 text-success"></i> <span class="align-middle">{{ __('admin.online') }}</span></span>
                  </span>
              </span>
          </button>
          <div class="dropdown-menu dropdown-menu-end">
              <!-- item-->
-             <h6 class="dropdown-header">Welcome {{ auth()->user()->name }}!</h6>
+             <h6 class="dropdown-header">{{ __('admin.welcome', ['name' => auth()->user()->name]) }}</h6>
              <a class="dropdown-item" href="{{ route('admin.profile-settings.edit') }}"><i class="align-middle mdi mdi-account-circle text-muted fs-16 me-1"></i> <span
-                     class="align-middle">Profile</span></a>
+                     class="align-middle">{{ __('admin.profile') }}</span></a>
              <!-- Logout -->
              <form method="POST" action="{{ route('logout') }}">
                  @csrf
                  <button type="submit" class="dropdown-item">
                      <i class="align-middle mdi mdi-logout text-muted fs-16 me-1"></i>
-                     <span class="align-middle" data-key="t-logout">Logout</span>
+                     <span class="align-middle" data-key="t-logout">{{ __('admin.logout') }}</span>
                  </button>
              </form>
          </div>
@@ -69,7 +69,7 @@
              <ul class="navbar-nav" id="navbar-nav">
 
                  <!--  Menu -->
-                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
+                 <li class="menu-title"><span data-key="t-menu">{{ __('admin.menu') }}</span></li>
 
 
 
@@ -78,7 +78,7 @@
                  <!-- Dashboard -->
                  <li class="nav-item">
                      <a class="nav-link menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                         <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboards</span>
+                         <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">{{ __('admin.dashboards') }}</span>
                      </a>
                  </li>
 
@@ -131,18 +131,18 @@
                  <li class="nav-item">
                      <a class="nav-link menu-link {{ request()->is('admin/services*') || request()->is('admin/service-prices*') ? '' : 'collapsed' }}" href="#sidebarService" data-bs-toggle="collapse" role="button"
                          aria-expanded="{{ request()->is('admin/services*') || request()->is('admin/service-prices*') ? 'true' : 'false' }}" aria-controls="sidebarService">
-                         <i class="ri-service-line"></i> <span>Service</span>
+                         <i class="ri-service-line"></i> <span>{{ __('admin.service') }}</span>
                      </a>
                      <div class="collapse menu-dropdown {{ request()->is('admin/services*') || request()->is('admin/service-prices*') ? 'show' : '' }}" id="sidebarService">
                          <ul class="nav nav-sm flex-column">
                              <li class="nav-item">
                                  <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
-                                     All Services
+                                     {{ __('admin.all_services') }}
                                  </a>
                              </li>
                              <li class="nav-item">
                                  <a href="{{ route('admin.service-prices.index') }}" class="nav-link {{ request()->routeIs('admin.service-prices.index') ? 'active' : '' }}">
-                                     Service Prices
+                                     {{ __('admin.service_prices') }}
                                  </a>
                              </li>
                          </ul>
@@ -187,7 +187,7 @@
                  {{-- Loyalty Points --}}
                  <li class="nav-item">
                      <a class="nav-link menu-link {{ request()->routeIs('admin.loyalty-setting.*') ? 'active' : '' }}" href="{{ route('admin.loyalty-setting.edit') }}">
-                         <i class="ri-medal-line"></i> <span>Loyalty Management</span>
+                         <i class="ri-medal-line"></i> <span>{{ __('admin.loyalty_management') }}</span>
                      </a>
                  </li>
 
@@ -199,18 +199,18 @@
                  <li class="nav-item">
                      <a class="nav-link menu-link {{ request()->routeIs('admin.manage.*') ? '' : 'collapsed' }}" href="#sidebarManageClients" data-bs-toggle="collapse" role="button"
                          aria-expanded="{{ request()->routeIs('admin.manage.*') ? 'true' : 'false' }}" aria-controls="sidebarManageClients">
-                         <i class="ri-user-settings-line"></i> <span data-key="t-manage-clients">Manage Clients</span>
+                         <i class="ri-user-settings-line"></i> <span data-key="t-manage-clients">{{ __('admin.manage_clients') }}</span>
                      </a>
                      <div class="collapse menu-dropdown {{ request()->routeIs('admin.manage.*') ? 'show' : '' }}" id="sidebarManageClients">
                          <ul class="nav nav-sm flex-column">
                              <li class="nav-item">
                                  <a href="{{ route('admin.manage.salons') }}" class="nav-link {{ request()->routeIs('admin.manage.salons') ? 'active' : '' }}">
-                                     Manage Salons
+                                     {{ __('admin.manage_salons') }}
                                  </a>
                              </li>
                              <li class="nav-item">
                                  <a href="{{ route('admin.manage.barbers') }}" class="nav-link {{ request()->routeIs('admin.manage.barbers') ? 'active' : '' }}">
-                                     Manage Barbers
+                                     {{ __('admin.manage_barbers') }}
                                  </a>
                              </li>
                          </ul>
@@ -222,38 +222,38 @@
                  <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('admin.reports.*') ? '' : 'collapsed' }}" href="#sidebarReports" data-bs-toggle="collapse" role="button"
                         aria-expanded="{{ request()->routeIs('admin.reports.*') ? 'true' : 'false' }}" aria-controls="sidebarReports">
-                        <i class="ri-file-chart-line"></i> <span data-key="t-reports">Reports & Finance</span>
+                        <i class="ri-file-chart-line"></i> <span data-key="t-reports">{{ __('admin.reports_finance') }}</span>
                     </a>
                     <div class="collapse menu-dropdown {{ request()->routeIs('admin.reports.*') ? 'show' : '' }}" id="sidebarReports">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
                                 <a href="{{ route('admin.reports.transactions') }}" class="nav-link {{ request()->routeIs('admin.reports.transactions') ? 'active' : '' }}">
-                                    All Transactions
+                                    {{ __('admin.all_transactions') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('admin.reports.providers') }}" class="nav-link {{ request()->routeIs('admin.reports.providers') ? 'active' : '' }}">
-                                    Provider Reports
+                                    {{ __('admin.provider_reports') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('admin.reports.bookings') }}" class="nav-link {{ request()->routeIs('admin.reports.bookings') ? 'active' : '' }}">
-                                    Booking Report
+                                    {{ __('admin.booking_report') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('admin.reports.revenue') }}" class="nav-link {{ request()->routeIs('admin.reports.revenue') ? 'active' : '' }}">
-                                    Revenue Report
+                                    {{ __('admin.revenue_report') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('admin.reports.loyalty') }}" class="nav-link {{ request()->routeIs('admin.reports.loyalty') ? 'active' : '' }}">
-                                    Loyalty Report
+                                    {{ __('admin.loyalty_report') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('admin.reports.analytics') }}" class="nav-link {{ request()->routeIs('admin.reports.analytics') ? 'active' : '' }}">
-                                    Business Analytics
+                                    {{ __('admin.business_analytics') }}
                                 </a>
                             </li>
                         </ul>
@@ -266,7 +266,7 @@
 
                  <li class="nav-item">
                      <a class="nav-link menu-link {{ request()->routeIs('admin.chat.view') ? 'active' : '' }}" href="{{ route('admin.chat.view') }}">
-                         <i class="ri-chat-3-line"></i> <span>Chat</span>
+                         <i class="ri-chat-3-line"></i> <span>{{ __('admin.chat') }}</span>
                      </a>
                  </li>
 
@@ -275,7 +275,7 @@
 
 
                  {{-- Settings --}}
-                 <li class="menu-title"><span data-key="t-menu">Settings</span></li>
+                 <li class="menu-title"><span data-key="t-menu">{{ __('admin.settings') }}</span></li>
 
                  {{-- Settings Section --}}
                  <li class="nav-item">
@@ -283,7 +283,7 @@
                          href="#sidebarSettings" data-bs-toggle="collapse" role="button"
                          aria-expanded="{{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') || request()->routeIs('admin.commission-settings.*') ? 'true' : 'false' }}"
                          aria-controls="sidebarSettings">
-                         <i class="ri-settings-3-line"></i> <span>Settings</span>
+                         <i class="ri-settings-3-line"></i> <span>{{ __('admin.settings') }}</span>
                      </a>
 
                      <div class="collapse menu-dropdown {{ request()->routeIs('admin.stripe-settings.*') || request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.mail-settings.*') || request()->routeIs('admin.profile-settings.*') || request()->routeIs('admin.payment-settings.*') || request()->routeIs('admin.social-settings.*') || request()->routeIs('admin.commission-settings.*') ? 'show' : '' }}"
@@ -293,49 +293,49 @@
                              {{-- Profile Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.profile-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.profile-settings.*') ? 'active' : '' }}">
-                                     <i class="ri-user-settings-line"></i> <span>Profile Settings</span>
+                                     <i class="ri-user-settings-line"></i> <span>{{ __('admin.profile_settings') }}</span>
                                  </a>
                              </li>
 
                              {{-- dynamic pages --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.dynamic.index') }}" class="nav-link {{ request()->routeIs('admin.dynamic.*') ? 'active' : '' }}">
-                                     <i class="ri-pages-line"></i> <span>Dynamic Pages</span>
+                                     <i class="ri-pages-line"></i> <span>{{ __('admin.dynamic_pages') }}</span>
                                  </a>
                              </li>
 
                              {{-- Social Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.social-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.social-settings.*') ? 'active' : '' }}">
-                                     <i class="ri-share-line"></i> <span>Social Settings</span>
+                                     <i class="ri-share-line"></i> <span>{{ __('admin.social_settings') }}</span>
                                  </a>
                              </li>
 
                              {{-- Stripe Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.stripe-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.stripe-settings.*') ? 'active' : '' }}">
-                                     <i class="ri-mail-settings-line"></i> <span>Stripe Settings</span>
+                                     <i class="ri-mail-settings-line"></i> <span>{{ __('admin.stripe_settings') }}</span>
                                  </a>
                              </li>
 
                              {{-- Commission Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.commission-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.commission-settings.*') ? 'active' : '' }}">
-                                     <i class="ri-percent-line"></i> <span>Commission Settings</span>
+                                     <i class="ri-percent-line"></i> <span>{{ __('admin.commission_settings') }}</span>
                                  </a>
                              </li>
 
                              {{-- System Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.system-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.system-settings.*') ? 'active' : '' }}">
-                                     <i class="ri-settings-3-line"></i> <span>System Settings</span>
+                                     <i class="ri-settings-3-line"></i> <span>{{ __('admin.system_settings') }}</span>
                                  </a>
                              </li>
 
                              {{-- Mail Settings --}}
                              <li class="nav-item">
                                  <a href="{{ route('admin.mail-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.mail-settings.*') ? 'active' : '' }}">
-                                     <i class="ri-mail-settings-line"></i> <span>Mail Settings</span>
+                                     <i class="ri-mail-settings-line"></i> <span>{{ __('admin.mail_settings') }}</span>
                                  </a>
                              </li>
                          </ul>

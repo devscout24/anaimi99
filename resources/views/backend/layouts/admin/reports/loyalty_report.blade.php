@@ -1,15 +1,15 @@
 @extends('backend.app')
-@section('title', 'Loyalty Points Report')
+@section('title', __('admin.loyalty_points_report'))
 @section('content')
 <!-- start page title -->
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">Loyalty Points Report</h4>
+            <h4 class="mb-sm-0">{{ __('admin.loyalty_points_report') }}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Reports</a></li>
-                    <li class="breadcrumb-item active">Loyalty</li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">{{ __('admin.reports') }}</a></li>
+                    <li class="breadcrumb-item active">{{ __('admin.loyalty') }}</li>
                 </ol>
             </div>
         </div>
@@ -23,7 +23,7 @@
             <div class="card-header border-0">
                 <div class="row g-4 align-items-center">
                     <div class="col-sm-auto">
-                        <h4 class="card-title mb-0">Points History</h4>
+                        <h4 class="card-title mb-0">{{ __('admin.points_history') }}</h4>
                     </div>
                 </div>
             </div>
@@ -33,11 +33,11 @@
                         <thead class="table-light text-muted">
                             <tr>
                                 <th>#</th>
-                                <th>Customer</th>
-                                <th>Provider</th>
-                                <th>Points awarded</th>
-                                <th>Invoice Ref</th>
-                                <th>Date</th>
+                                <th>{{ __('admin.customer') }}</th>
+                                <th>{{ __('admin.provider') }}</th>
+                                <th>{{ __('admin.points_awarded') }}</th>
+                                <th>{{ __('admin.invoice_ref') }}</th>
+                                <th>{{ __('admin.date') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -63,7 +63,7 @@
                     data: 'point',
                     name: 'point',
                     render: function(data) {
-                        return `<span class="badge bg-success-subtle text-success fs-12"><i class="ri-star-fill me-1"></i>${data} Points</span>`;
+                        return `<span class="badge bg-success-subtle text-success fs-12"><i class="ri-star-fill me-1"></i>${data} {{ __('admin.points') }}</span>`;
                     }
                 },
                 {data: 'invoice', name: 'invoice'},
@@ -75,7 +75,7 @@
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric'
-                        }) : 'N/A';
+                        }) : @json(__('admin.not_available'));
                     }
                 },
             ]
